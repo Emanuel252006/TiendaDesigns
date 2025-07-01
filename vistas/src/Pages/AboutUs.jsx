@@ -12,7 +12,7 @@ const EcommercePage = () => {
             <h2>Acerca de Nuestra Marca</h2>
             <p>
               Somos una marca de ropa que nace con el propósito de redefinir la forma en la que te expresas a través de tu estilo. 
-              En nuestro ecommerce, fusionamos moda urbana, confort y autenticidad para brindarte prendas únicas, versátiles y con identidad propia.
+              En nuestro e-commerce, fusionamos moda urbana, confort y autenticidad para brindarte prendas únicas, versátiles y con identidad propia.
             </p>
           </div>
           <div className="col-md-6 image-right image-column">
