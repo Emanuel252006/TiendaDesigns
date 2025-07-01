@@ -1,0 +1,47 @@
+/* Sidebar.css */
+
+/* Estilos para la marca y logo */
+.navbar-brand {
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+img.logo {
+  width: 105px;
+  height: auto;
+  max-height: 105px;
+}
+
+/* Estilos para los enlaces de navegación */
+.nav-link {
+  font-size: 1rem;
+  margin-right: 1rem;
+}
+
+/* Estilos para íconos en enlaces */
+.nav-link.position-relative i {
+  font-size: 1.2rem;
+}
+
+/* Clase para margen a la derecha */
+.margin-right-5 {
+  margin-right: 5px;
+}
+
+/* Navbar fija en la parte superior */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 9999;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.281);
+}
+
+/* Diseño responsivo */
+@media (max-width: 768px) {
+  .navbar-nav {
+    text-align: center;
+    margin-top: 1rem;
+  }
+}

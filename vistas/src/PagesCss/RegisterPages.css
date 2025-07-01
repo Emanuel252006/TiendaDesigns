@@ -1,0 +1,117 @@
+/* Fondo y contenedor principal */
+.register-page {
+    background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 40px 0;
+  }
+  
+  /* Caja del formulario de registro */
+  .register-container {
+    background: #fff;
+    border-radius: 8px;
+    padding: 40px 30px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    margin-top: 120px;
+  }
+  
+  /* Título del registro */
+  .register-title {
+    margin-bottom: 30px;
+    font-size: 28px;
+    color: #333;
+    font-weight: 700;
+  }
+  
+  /* Grupos del formulario */
+  .form-group-custom {
+    margin-bottom: 20px;
+    text-align: left;
+  }
+  .form-group-custom label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: block;
+  }
+  
+  /* Estilos para los inputs */
+  .form-control {
+    border-radius: 4px;
+    padding: 10px;
+    font-size: 16px;
+  }
+  
+  /* Botón de registro */
+  .register-button {
+    width: 100%;
+    padding: 12px;
+    font-size: 18px;
+    border-radius: 4px;
+  }
+  
+  .register-button:hover,
+  .register-button:focus {
+    background-color: #080808;
+    border-color: #0c0c0c;
+  }
+  
+  /* Footer del registro */
+  .register-footer {
+    margin-top: 20px;
+    font-size: 14px;
+  }
+  .register-footer a {
+    color: #000000;
+    text-decoration: none;
+  }
+  .register-footer a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 768px) {
+  .register-container {
+    margin: 80px 20px 20px 20px;
+    padding: 30px 20px;
+  }
+
+  .register-title {
+    font-size: 24px;
+  }
+
+  .form-control {
+    font-size: 15px;
+    padding: 9px;
+  }
+
+  .register-button {
+    font-size: 16px;
+    padding: 10px;
+  }
+
+  .register-footer {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-title {
+    font-size: 20px;
+  }
+
+  .form-control {
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .register-button {
+    font-size: 15px;
+    padding: 9px;
+    border-radius: 3px;
+  }
+
+  .register-footer {
+    font-size: 12px;
+  }
+}

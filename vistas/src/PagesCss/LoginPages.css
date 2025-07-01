@@ -1,0 +1,110 @@
+/* Envuelve todo el contenido */
+.login-page {
+  background: linear-gradient(#ffffff);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Asegurarse de que el contenedor principal ocupe el espacio */
+.login-page > *:not(.footer) {
+  flex: 1;
+}
+
+/* Contenedor para el login, se ha agregado margin-top para bajarlo */
+.login-container {
+  background: #fff;
+  border-radius: 15px;
+  padding: 40px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  margin: 400px auto 20px auto;  /* Ajusta el margin-top (100px) según lo necesites */
+}
+
+/* Título del login */
+.login-title {
+  margin-bottom: 30px;
+  font-size: 28px;
+  color: #333;
+  font-weight: 700;
+}
+
+/* Grupos de formulario */
+.form-group-custom {
+  margin-bottom: 20px;
+  text-align: left;
+}
+.form-group-custom label {
+  font-weight: 600;
+  margin-bottom: 5px;
+  display: block;
+}
+
+/* Estilo de los inputs */
+.form-control {
+  border-radius: 25px;
+  padding: 12px 15px;
+  font-size: 16px;
+  border: 1px solid #e0e0e0;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.form-control:focus {
+  border-color: #000000;
+  box-shadow: 0 0 5px rgba(36, 36, 36, 0.3);
+}
+
+/* Botón de login */
+.login-button {
+  width: 100%;
+  padding: 12px;
+  font-size: 18px;
+  border-radius: 25px;
+  background-color: #000000;
+  border: none;
+  color: #fff;
+  transition: background-color 0.3s ease;
+}
+.login-button:hover,
+.login-button:focus {
+  background-color: #121213;
+}
+
+@media (max-width: 768px) {
+  .login-container {
+    margin: 100px 20px 20px 20px;
+    padding: 30px 20px;
+  }
+
+  .login-title {
+    font-size: 24px;
+  }
+
+  .form-control {
+    font-size: 15px;
+    padding: 10px 12px;
+  }
+
+  .login-button {
+    font-size: 16px;
+    padding: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-title {
+    font-size: 20px;
+  }
+
+  .form-control {
+    font-size: 14px;
+    padding: 8px 10px;
+  }
+
+  .login-button {
+    font-size: 15px;
+    padding: 10px;
+    border-radius: 20px;
+  }
+}

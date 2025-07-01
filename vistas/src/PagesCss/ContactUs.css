@@ -1,0 +1,222 @@
+/* Aseguramos que html y body ocupen el 100% del alto y ancho */
+html, body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Contenedor principal para la estructura vertical de la página */
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Área de contenido: ya no se centra, se aprovecha todo el ancho */
+.content {
+  flex-grow: 1;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Contenedor de la página con padding uniforme para márgenes iguales en todos los lados */
+.contactanos-page {
+  width: 100%;
+  padding: 100px;  /* 100px en todos los lados */
+  box-sizing: border-box;
+}
+
+/* Contenedor principal del contenido, usando todo el ancho */
+.contactanos-container {
+  display: flex;
+  gap: 20px;
+  align-items: stretch;
+  width: 100%;
+}
+
+/* Ambas secciones ocuparán el mismo ancho */
+.contactanos-info,
+.contactanos-illustration {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 35px;
+}
+
+/* Estilos de la sección de información y formulario */
+.contactanos-info h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.contactanos-info p {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  color: #555;
+}
+
+.contact-info p {
+  margin: 8px 0;
+}
+
+/* Estilos del formulario */
+.contact-form .form-group {
+  margin-bottom: 15px;
+}
+
+.contact-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.name-fields {
+  display: flex;
+  gap: 10px;
+}
+
+.name-fields input {
+  flex: 1;
+  padding: 8px;
+  font-size: 1rem;
+}
+
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 20px; /* Hace los inputs más ovalados */
+}
+
+.contact-form textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.contact-form button {
+  cursor: pointer;
+  background-color: #0b0c0c;
+  color: #fff;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 25px; /* Hace el botón más ovalado */
+  transition: background-color 0.3s ease;
+}
+
+.contact-form button:hover {
+  background-color: #000000;
+}
+
+/* Sección de la imagen; se ajusta para ser casi del mismo tamaño que el formulario */
+.contactanos-illustration img {
+  width: 700px;
+  height: 500px;
+  object-fit: cover;
+}
+
+/* FOOTER */
+/* Estilo base del footer (se mantiene la altura y color de fondo) */
+.footer {
+  background-color: #181717;
+  padding: 20px 0;
+  font-size: 0.9rem;
+  color: #ffffff;
+}
+
+/* Nuevo layout para el footer: contenedor central */
+.footer-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 30px;
+}
+
+/* Texto del footer alineado a la izquierda */
+.footer-text {
+  text-align: left;
+}
+
+.footer-text p {
+  margin: 0;
+}
+
+/* Iconos en el footer alineados a la derecha */
+.footer-icons a {
+  color: #ffffff;
+  font-size: 1.5rem;
+  margin-left: 15px;
+  transition: color 0.3s ease;
+}
+
+.footer-icons a:hover {
+  color: #1a73e8;
+}
+
+@media (max-width: 768px) {
+  .contactanos-page {
+    padding: 40px 20px;
+  }
+
+  .contactanos-container {
+    flex-direction: column;
+  }
+
+  .contactanos-info,
+  .contactanos-illustration {
+    padding: 20px;
+    width: 100%;
+  }
+
+  .contactanos-info h1 {
+    font-size: 2rem;
+    text-align: center;
+  }
+
+  .contactanos-info p {
+    font-size: 0.95rem;
+    text-align: center;
+  }
+
+  .name-fields {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .contactanos-illustration img {
+    width: 100%;
+    height: auto;
+    max-height: 400px;
+    border-radius: 16px;
+  }
+
+  .footer-container {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .contactanos-info h1 {
+    font-size: 1.6rem;
+  }
+
+  .contact-form input,
+  .contact-form textarea {
+    font-size: 0.9rem;
+  }
+
+  .contact-form button {
+    width: 100%;
+    padding: 10px;
+    font-size: 0.95rem;
+  }
+}

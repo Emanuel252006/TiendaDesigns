@@ -1,0 +1,32 @@
+/* Footer.css */
+.footer {
+  margin-top: auto; /* Empuja el footer al final del contenedor principal */
+  width: 100%;
+  background-color: #111;
+  padding: 20px 0; /* Padding vertical; sin padding horizontal */
+}
+
+.footer-container {
+  max-width: 900px;
+  margin: 0 auto;   /* Centra el contenido interno */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 20px;  /* Opcional: padding interno para el contenido del footer */
+}
+
+.footer-text p {
+  color: #fff;
+  font-size: 14px;
+}
+
+.footer-text a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.footer-icons a {
+  color: #fff;
+  margin: 0 5px;
+  font-size: 20px;
+}
