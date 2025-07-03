@@ -17,20 +17,17 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  // Ahora errors es un objeto { general?, Correo?, Contrasena?, NombreUsuario?, Direccion?, Ciudad?, Pais?, CodigoPostal? }
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(true);
 
-  // Registrarse
+  // --------------------
+  // signup: crea usuario sin autenticarlo
+  // --------------------
   const signup = async (userData) => {
     try {
       const res = await registerRequest(userData);
-      setIsAuthenticated(true);
-      setUser({
-        UsuarioID: res.data.UsuarioID,
-        DireccionID: res.data.DireccionID,
-      });
       setErrors({});
+      return { success: true };
     } catch (err) {
       const payload = err.response?.data;
       const mapped = {};
@@ -38,36 +35,23 @@ export const AuthProvider = ({ children }) => {
       if (Array.isArray(payload)) {
         payload.forEach((msg) => {
           const l = msg.toLowerCase();
-          if (l.includes("correo")) {
-            mapped.Correo = msg;
-          } else if (l.includes("contraseña") || l.includes("contrasena")) {
-            mapped.Contrasena = msg;
-          } else if (l.includes("usuario")) {
-            mapped.NombreUsuario = msg;
-          } else if (l.includes("dirección") || l.includes("direccion")) {
-            mapped.Direccion = msg;
-          } else if (l.includes("ciudad")) {
-            mapped.Ciudad = msg;
-          } else if (l.includes("país") || l.includes("pais")) {
-            mapped.Pais = msg;
-          } else if (
+          if (l.includes("correo")) mapped.Correo = msg;
+          else if (l.includes("contraseña") || l.includes("contrasena")) mapped.Contrasena = msg;
+          else if (l.includes("usuario")) mapped.NombreUsuario = msg;
+          else if (l.includes("dirección") || l.includes("direccion")) mapped.Direccion = msg;
+          else if (l.includes("ciudad")) mapped.Ciudad = msg;
+          else if (l.includes("país") || l.includes("pais")) mapped.Pais = msg;
+          else if (
             l.includes("código postal") ||
             l.includes("codigo postal") ||
             l.includes("codigopostal")
           ) {
             mapped.CodigoPostal = msg;
           } else {
-            mapped.general = mapped.general
-              ? mapped.general + " / " + msg
-              : msg;
+            mapped.general = mapped.general ? mapped.general + " / " + msg : msg;
           }
         });
-      } else if (
-        payload &&
-        typeof payload === "object" &&
-        !payload.message
-      ) {
-        // Si vienen como { field: ["err1","err2"], ... }
+      } else if (payload && typeof payload === "object" && !payload.message) {
         Object.entries(payload).forEach(([key, val]) => {
           mapped[key] = Array.isArray(val) ? val.join(" / ") : val;
         });
@@ -80,18 +64,20 @@ export const AuthProvider = ({ children }) => {
       }
 
       setErrors(mapped);
-      setIsAuthenticated(false);
-      setUser(null);
+      return { success: false };
     }
   };
 
-  // Iniciar sesión (mapeo original)
+  // --------------------
+  // signin: inicia sesión y almacena token/usuario
+  // --------------------
   const signin = async (userData) => {
     try {
       const res = await loginRequest(userData);
       setIsAuthenticated(true);
       setUser(res.data);
       setErrors({});
+      return { success: true };
     } catch (err) {
       const payload = err.response?.data;
       const mapped = {};
@@ -100,12 +86,8 @@ export const AuthProvider = ({ children }) => {
         payload.forEach((msg) => {
           const l = msg.toLowerCase();
           if (l.includes("correo")) mapped.Correo = msg;
-          else if (l.includes("contraseña") || l.includes("contrasena"))
-            mapped.Contrasena = msg;
-          else
-            mapped.general = mapped.general
-              ? mapped.general + " / " + msg
-              : msg;
+          else if (l.includes("contraseña") || l.includes("contrasena")) mapped.Contrasena = msg;
+          else mapped.general = mapped.general ? mapped.general + " / " + msg : msg;
         });
       } else if (typeof payload === "string") {
         mapped.general = payload;
@@ -118,9 +100,13 @@ export const AuthProvider = ({ children }) => {
       setErrors(mapped);
       setIsAuthenticated(false);
       setUser(null);
+      return { success: false };
     }
   };
 
+  // --------------------
+  // logout
+  // --------------------
   const logout = async () => {
     try {
       await logao();
@@ -133,7 +119,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Limpia errores tras 5s
+  // --------------------
+  // limpiar errores tras 5s
+  // --------------------
   useEffect(() => {
     if (Object.keys(errors).length > 0) {
       const t = setTimeout(() => setErrors({}), 5000);
@@ -141,7 +129,9 @@ export const AuthProvider = ({ children }) => {
     }
   }, [errors]);
 
-  // Verifica token al montar
+  // --------------------
+  // verifica token al montar
+  // --------------------
   useEffect(() => {
     (async () => {
       setLoading(true);
@@ -149,7 +139,8 @@ export const AuthProvider = ({ children }) => {
       if (!token) {
         setIsAuthenticated(false);
         setUser(null);
-        return setLoading(false);
+        setLoading(false);
+        return;
       }
       try {
         const res = await verifyTokenRequest(token);
@@ -183,5 +174,5 @@ export const AuthProvider = ({ children }) => {
     >
       {children}
     </AuthContext.Provider>
-  );
+  );
 };

@@ -32,7 +32,7 @@ function App() {
       {/* Rutas protegidas */}
       <Route element={<ProtectedRouter />}>
         <Route path="/carrito" element={<CartPage />} />    
-        <Route path="/detalle" element={<DetailsPage />} />    
+        <Route path="/detalle/:id" element={<DetailsPage />} />    
         {/* Puedes agregar más rutas protegidas aquí */}
       </Route>
       

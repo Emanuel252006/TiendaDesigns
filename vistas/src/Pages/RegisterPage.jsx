@@ -1,6 +1,16 @@
-import React, { useEffect } from "react";
+// src/pages/RegisterPages.jsx
+
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Container, Row, Col, Form, Button } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Form,
+  Button,
+  Spinner,
+  Alert,
+} from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import "../PagesCss/RegisterPages.css";
@@ -8,24 +18,16 @@ import Footer from "../components/Footer.jsx";
 
 function RegisterPages() {
   const navigate = useNavigate();
-  const { signup, isAuthenticated, errors: authErrors } = useAuth();
+  const { signup, errors: authErrors, loading } = useAuth();
   const { register, handleSubmit } = useForm();
-
-  // Si ya está autenticado, redirige a /inicio
-  useEffect(() => {
-    if (isAuthenticated) {
-      const timer = setTimeout(() => navigate("/inicio"), 100);
-      return () => clearTimeout(timer);
-    }
-  }, [isAuthenticated, navigate]);
+  const [successMsg, setSuccessMsg] = useState("");
 
   const onSubmit = async (data) => {
-    // Validación local mínima para confirmar contraseñas
     if (data.password !== data.confirmPassword) {
       return alert("Las contraseñas no coinciden.");
     }
 
-    await signup({
+    const result = await signup({
       NombreUsuario: data.nombreUsuario,
       Correo: data.email,
       Contrasena: data.password,
@@ -35,6 +37,12 @@ function RegisterPages() {
       Pais: data.pais,
       CodigoPostal: data.codigoPostal,
     });
+
+    if (result.success) {
+      setSuccessMsg("¡Cuenta creada con éxito! Redirigiendo a iniciar sesión…");
+      setTimeout(() => navigate("/login"), 1500);
+    }
+    // Si falla, authErrors contiene los mensajes que ya se muestran abajo
   };
 
   return (
@@ -48,7 +56,10 @@ function RegisterPages() {
 
                 <Form noValidate onSubmit={handleSubmit(onSubmit)}>
                   {/* Nombre de Usuario */}
-                  <Form.Group controlId="nombreUsuario" className="form-group-custom">
+                  <Form.Group
+                    controlId="nombreUsuario"
+                    className="form-group-custom"
+                  >
                     <Form.Label>Nombre de Usuario</Form.Label>
                     <Form.Control
                       type="text"
@@ -93,26 +104,33 @@ function RegisterPages() {
                   </Form.Group>
 
                   {/* Confirmar Contraseña */}
-                  <Form.Group controlId="confirmPassword" className="form-group-custom">
+                  <Form.Group
+                    controlId="confirmPassword"
+                    className="form-group-custom"
+                  >
                     <Form.Label>Confirmar Contraseña</Form.Label>
                     <Form.Control
                       type="password"
                       placeholder="Confirma tu contraseña"
                       {...register("confirmPassword")}
                     />
-                    {/* Si el back devuelve un error general sobre contraseñas */}
-                    {authErrors.general &&
-                      authErrors.general.toLowerCase().includes("contraseña") && (
-                        <Form.Text className="text-danger">
-                          {authErrors.general}
-                        </Form.Text>
-                      )}
                   </Form.Group>
+                  {authErrors.general &&
+                    authErrors.general
+                      .toLowerCase()
+                      .includes("contraseña") && (
+                      <Form.Text className="text-danger">
+                        {authErrors.general}
+                      </Form.Text>
+                    )}
 
                   <h4 className="mt-4 mb-3">Información de Dirección</h4>
 
                   {/* Dirección */}
-                  <Form.Group controlId="direccion" className="form-group-custom">
+                  <Form.Group
+                    controlId="direccion"
+                    className="form-group-custom"
+                  >
                     <Form.Label>Dirección Completa</Form.Label>
                     <Form.Control
                       type="text"
@@ -159,7 +177,10 @@ function RegisterPages() {
                   </Form.Group>
 
                   {/* Código Postal */}
-                  <Form.Group controlId="codigoPostal" className="form-group-custom">
+                  <Form.Group
+                    controlId="codigoPostal"
+                    className="form-group-custom"
+                  >
                     <Form.Label>Código Postal</Form.Label>
                     <Form.Control
                       type="text"
@@ -173,8 +194,34 @@ function RegisterPages() {
                     )}
                   </Form.Group>
 
-                  <Button variant="primary" type="submit" className="register-button mt-3">
-                    Registrarse
+                  {/* Mensaje de éxito inline */}
+                  {successMsg && (
+                    <Alert variant="success" className="mt-3">
+                      {successMsg}
+                    </Alert>
+                  )}
+
+                  {/* Botón de envío */}
+                  <Button
+                    variant="primary"
+                    type="submit"
+                    className="register-button mt-3"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <Spinner
+                          as="span"
+                          animation="border"
+                          size="sm"
+                          role="status"
+                          aria-hidden="true"
+                        />{" "}
+                        Registrando...
+                      </>
+                    ) : (
+                      "Registrarse"
+                    )}
                   </Button>
                 </Form>
               </div>
@@ -187,4 +234,4 @@ function RegisterPages() {
   );
 }
 
-export default RegisterPages;
+export default RegisterPages;

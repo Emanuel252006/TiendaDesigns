@@ -5,24 +5,24 @@
   padding: 0;
 }
 
-/* Contenedor principal de la página sin padding: se extiende 100% del ancho */
+/* Contenedor principal sin padding, ocupa 100% altura */
 .product-page-wrapper {
   display: flex;
-  flex-direction: column; /* Organiza los elementos en columna */
-  min-height: 100vh;      /* Ocupa al menos toda la altura de la ventana */
+  flex-direction: column;
+  min-height: 100vh;
 }
 
-/* Contenedor del contenido principal: aquí aplicamos el padding deseado */
+/* Contenido principal con padding */
 .main-content {
-  flex: 1;                /* Se expande para empujar el footer hacia abajo */
-  padding: 20px;          /* Espaciado interno que SOLO afecta al contenido */
+  flex: 1;
+  padding: 20px;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 20px;
 }
 
-/* Sección de la imagen del producto */
+/* Sección de imagen */
 .product-image-section {
   flex: 1 1 400px;
   display: flex;
@@ -38,7 +38,7 @@
   border-radius: 5px;
 }
 
-/* Sección de la información del producto */
+/* Sección de información */
 .product-info-section {
   flex: 1 1 400px;
   display: flex;
@@ -48,10 +48,8 @@
   background-color: #f9f9f9;
   border-radius: 5px;
   margin-top: 140px;
-
 }
 
-/* Título y precio */
 .product-title {
   font-size: 2rem;
   margin-bottom: 10px;
@@ -65,7 +63,6 @@
   color: #181717;
 }
 
-/* Descripción del producto */
 .product-description {
   font-size: 1.1rem;
   margin-bottom: 20px;
@@ -73,25 +70,55 @@
   line-height: 1.5;
 }
 
-/* Opciones del producto */
-.product-options,
-.product-quantity {
-  margin-bottom: 15px;
+/* Selector de tallas */
+.product-options {
+  margin-bottom: 20px;
 }
 
-.product-options label,
-.product-quantity label {
+.product-options label {
   display: block;
   margin-bottom: 5px;
   font-weight: bold;
 }
 
-.product-options select,
-.product-quantity input {
+.product-options select {
   width: 100%;
   padding: 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
+}
+
+/* Contador de cantidad */
+.product-quantity {
+  margin-bottom: 20px;
+}
+
+.quantity-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.quantity-btn {
+  padding: 6px 12px;
+  background: #3498DB;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.quantity-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.quantity-input {
+  width: 50px;
+  text-align: center;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 4px;
 }
 
 /* Botón de añadir al carrito */
