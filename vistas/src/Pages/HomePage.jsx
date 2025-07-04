@@ -1,94 +1,122 @@
+// src/Pages/HomePage.jsx
 import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "../PagesCss/HomePages.css";
 import { getProductsRequest } from "../api/productApi";
+import Navigation from "../components/navegation.jsx";
 import DetalleButton from "../components/DetalleButton.jsx";
 import Footer from "../components/Footer.jsx";
-import Navigation from "../components/navegation.jsx";
+import CustomImage from "../components/CustomImage.jsx";
 
-const HomePage = () => {
-  const [productosDestacados, setProductosDestacados] = useState([]);
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5001";
+
+export default function HomePage() {
+  const [banners, setBanners] = useState([]);
+  const [productos, setProductos] = useState([]);
 
   useEffect(() => {
-    const cargarProductos = async () => {
-      try {
-        const data = await getProductsRequest();
-        // Si tu API marca los destacados, filtra aquí. 
-        // Ejemplo: const destacados = data.filter(p => p.esDestacado);
-        // Por simplicidad tomamos los primeros 5:
-        const destacados = data.slice(0, 5);
-        setProductosDestacados(destacados);
-      } catch (error) {
-        console.error("Error al cargar productos destacados:", error);
-      }
-    };
-    cargarProductos();
+    fetch(`${API_BASE}/api/carrusel`)
+      .then((r) => r.json())
+      .then((data) =>
+        setBanners(data.sort((a, b) => a.Orden - b.Orden))
+      )
+      .catch(console.error);
+
+    getProductsRequest()
+      .then((data) => setProductos(data.slice(0, 4)))
+      .catch(console.error);
   }, []);
 
   return (
     <>
-      {/* Navbar */}
       <Navigation />
 
-      {/* Header */}
-      <header className="main-header position-relative">
-        <div className="container-fluid">
-          <div className="header-image position-relative">
-            <img
-              src="src/images/imggrande.jpg"
-              alt="Moda Formal"
-              className="img-fluid header-img"
-            />
-            <div className="header-overlay">
-              <h1 className="header-title">Elegancia y Estilo en Ropa Formal</h1>
+      {/* Carrusel */}
+      <div
+        id="homeCarousel"
+        className="carousel slide mb-5"
+        data-bs-ride="carousel"
+      >
+        <div className="carousel-inner">
+          {banners.length === 0 && (
+            <div className="carousel-item active">
+              <div
+                className="d-flex justify-content-center align-items-center"
+                style={{ height: 300 }}
+              >
+                Sin banners
+              </div>
             </div>
-          </div>
+          )}
+          {banners.map((b, i) => (
+            <div
+              key={b.CarruselID}
+              className={`carousel-item${i === 0 ? " active" : ""}`}
+            >
+              <CustomImage
+                folder="carrusel"
+                filename={b.ImagenPath}
+                alt={`Banner ${i + 1}`}
+                className="d-block w-100 carousel-img"
+              />
+            </div>
+          ))}
         </div>
-      </header>
+        {banners.length > 1 && (
+          <>
+            <button
+              className="carousel-control-prev"
+              type="button"
+              data-bs-target="#homeCarousel"
+              data-bs-slide="prev"
+            >
+              <span className="carousel-control-prev-icon" />
+            </button>
+            <button
+              className="carousel-control-next"
+              type="button"
+              data-bs-target="#homeCarousel"
+              data-bs-slide="next"
+            >
+              <span className="carousel-control-next-icon" />
+            </button>
+          </>
+        )}
+      </div>
 
-      {/* Catálogo de Productos Destacados */}
+      {/* Productos Destacados */}
       <section className="product-catalog py-5">
         <div className="container-fluid">
-          <div className="row mb-4">
-            <div className="col-12">
-              <h2 className="text-center">Productos Destacados</h2>
-            </div>
-          </div>
-
+          <h2 className="text-center mb-4">Productos Destacados</h2>
           <div className="row justify-content-center">
-            {productosDestacados.length === 0 ? (
-              <p>No hay productos destacados en este momento.</p>
-            ) : (
-              productosDestacados.map((producto) => (
-                <div
-                  key={producto.ProductoID}
-                  className="col-lg-2 col-md-2 col-sm-4 mb-4 d-flex justify-content-center"
-                >
-                  <div className="card">
-                    <img
-                      src={`http://localhost:5001${producto.Imagen}`}
-                      alt={producto.NombreProducto}
-                      className="card-img-top"
-                      onError={(e) => (e.target.src = "/images/default.png")}
+            {productos.length === 0 && <p>No hay productos.</p>}
+            {productos.map((p) => (
+              <div
+                key={p.ProductoID}
+                className="col-lg-2 col-md-3 col-sm-4 mb-4 d-flex justify-content-center"
+              >
+                <div className="card">
+                  <CustomImage
+                    folder="productos"
+                    filename={p.Imagen}
+                    alt={p.NombreProducto}
+                    className="card-img-top"
+                  />
+                  <div className="card-body text-center">
+                    <h5 className="card-title">{p.NombreProducto}</h5>
+                    <p className="card-text">
+                      ${parseFloat(p.Precio).toLocaleString()}
+                    </p>
+                    <DetalleButton
+                      to={`/detalle/${p.ProductoID}`}
+                      label="Ver Detalle"
                     />
-                    <div className="card-body text-center">
-                      <h5 className="card-title">{producto.NombreProducto}</h5>
-                      <p className="card-text">
-                        ${parseFloat(producto.Precio).toLocaleString()}
-                      </p>
-                      <DetalleButton
-                        to={`/detalle/${producto.ProductoID}`}
-                        label="Ver Detalle"
-                      />
-                    </div>
                   </div>
                 </div>
-              ))
-            )}
+              </div>
+            ))}
           </div>
-
-          {/* Botón “VER TODO” */}
           <div className="row mt-4">
             <div className="col text-center">
               <a href="/tienda" className="btn btn-secondary">
@@ -102,6 +130,4 @@ const HomePage = () => {
       <Footer />
     </>
   );
-};
-
-export default HomePage;
+}

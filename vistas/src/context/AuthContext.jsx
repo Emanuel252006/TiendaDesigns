@@ -20,53 +20,71 @@ export const AuthProvider = ({ children }) => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(true);
 
-  // --------------------
-  // signup: crea usuario sin autenticarlo
-  // --------------------
-  const signup = async (userData) => {
-    try {
-      const res = await registerRequest(userData);
-      setErrors({});
-      return { success: true };
-    } catch (err) {
-      const payload = err.response?.data;
-      const mapped = {};
+// Dentro de AuthProvider, en la función signup:
+const signup = async (userData) => {
+  try {
+    const res = await registerRequest(userData);
+    setErrors({});
+    return { success: true };
+  } catch (err) {
+    const payload = err.response?.data;
+    const mapped = {};
 
-      if (Array.isArray(payload)) {
-        payload.forEach((msg) => {
-          const l = msg.toLowerCase();
-          if (l.includes("correo")) mapped.Correo = msg;
-          else if (l.includes("contraseña") || l.includes("contrasena")) mapped.Contrasena = msg;
-          else if (l.includes("usuario")) mapped.NombreUsuario = msg;
-          else if (l.includes("dirección") || l.includes("direccion")) mapped.Direccion = msg;
-          else if (l.includes("ciudad")) mapped.Ciudad = msg;
-          else if (l.includes("país") || l.includes("pais")) mapped.Pais = msg;
-          else if (
-            l.includes("código postal") ||
-            l.includes("codigo postal") ||
-            l.includes("codigopostal")
-          ) {
-            mapped.CodigoPostal = msg;
-          } else {
-            mapped.general = mapped.general ? mapped.general + " / " + msg : msg;
-          }
-        });
-      } else if (payload && typeof payload === "object" && !payload.message) {
-        Object.entries(payload).forEach(([key, val]) => {
-          mapped[key] = Array.isArray(val) ? val.join(" / ") : val;
-        });
-      } else if (typeof payload === "string") {
-        mapped.general = payload;
-      } else if (payload?.message) {
-        mapped.general = payload.message;
-      } else {
-        mapped.general = "Error inesperado al registrar.";
-      }
-
+    // 1) Caso correo duplicado (objeto con clave "Correo")
+    if (payload && typeof payload === "object" && !Array.isArray(payload) && payload.Correo) {
+      mapped.Correo = payload.Correo;
       setErrors(mapped);
       return { success: false };
     }
-  };
+
+    // 2) Validaciones tipo array (por ejemplo express-validator)
+    if (Array.isArray(payload)) {
+      payload.forEach((msg) => {
+        const l = msg.toLowerCase();
+        if (l.includes("correo")) mapped.Correo = msg;
+        else if (l.includes("contraseña") || l.includes("contrasena"))
+          mapped.Contrasena = msg;
+        else if (l.includes("usuario")) mapped.NombreUsuario = msg;
+        else if (l.includes("dirección") || l.includes("direccion"))
+          mapped.Direccion = msg;
+        else if (l.includes("ciudad")) mapped.Ciudad = msg;
+        else if (l.includes("país") || l.includes("pais")) mapped.Pais = msg;
+        else if (
+          l.includes("código postal") ||
+          l.includes("codigo postal") ||
+          l.includes("codigopostal")
+        ) {
+          mapped.CodigoPostal = msg;
+        } else {
+          mapped.general = mapped.general
+            ? mapped.general + " / " + msg
+            : msg;
+        }
+      });
+    }
+    // 3) Validaciones tipo objeto genérico (sin message)
+    else if (payload && typeof payload === "object" && !payload.message) {
+      Object.entries(payload).forEach(([key, val]) => {
+        mapped[key] = Array.isArray(val) ? val.join(" / ") : val;
+      });
+    }
+    // 4) Mensaje string puro
+    else if (typeof payload === "string") {
+      mapped.general = payload;
+    }
+    // 5) Error con message
+    else if (payload?.message) {
+      mapped.general = payload.message;
+    }
+    // 6) Fallback
+    else {
+      mapped.general = "Error inesperado al registrar.";
+    }
+
+    setErrors(mapped);
+    return { success: false };
+  }
+};
 
   // --------------------
   // signin: inicia sesión y almacena token/usuario

@@ -1,3 +1,31 @@
+/* Carrusel principal */
+#homeCarousel {
+  margin-bottom: 2rem;
+}
+
+.carousel-img {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: block;
+  max-height: 950px;
+  height: auto;
+  object-fit: cover;
+  object-position: center;
+}
+
+@media (max-width: 991px) {
+  .carousel-img {
+    max-height: 500px;
+  }
+}
+
+@media (max-width: 575px) {
+  .carousel-img {
+    max-height: 300px;
+  }
+}
+
 /* Ajustar fuente y resets básicos */
 body {
   font-family: 'Arial', sans-serif;
@@ -67,12 +95,14 @@ body {
 }
 
 /* Botones */
-.btn-primary, .btn-secondary {
+.btn-primary,
+.btn-secondary {
   background-color: #000000;
   border-color: #000000;
 }
 
-.btn-primary:hover, .btn-secondary:hover {
+.btn-primary:hover,
+.btn-secondary:hover {
   background-color: #0c0c0c;
   border-color: #050505;
 }
@@ -86,6 +116,7 @@ body {
   color: #ffffff;
 }
 
+/* Asegurar ancho completo */
 .container {
   max-width: 100% !important;
   padding-left: 15px;
@@ -128,7 +159,8 @@ body {
     height: 120px;
   }
 
-  .btn-primary, .btn-secondary {
+  .btn-primary,
+  .btn-secondary {
     font-size: 0.9rem;
     padding: 0.4rem 0.7rem;
   }

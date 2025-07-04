@@ -1,3 +1,4 @@
+// src/Pages/AboutUs.jsx
 import React from "react";
 import "../PagesCss/AboutUs.css";
 import Footer from "../components/Footer";
@@ -5,17 +6,19 @@ import Footer from "../components/Footer";
 const EcommercePage = () => {
   return (
     <>
+      {/* Sección Acerca de la Marca */}
       <div className="container ecommerce-page mt-spacing">
-        {/* Sección Acerca de la Marca */}
         <div className="row align-items-center mb-5">
-          <div className="col-md-6 text-left text-column">
+          <div className="col-md-6 text-column">
             <h2>Acerca de Nuestra Marca</h2>
             <p>
-              Somos una marca de ropa que nace con el propósito de redefinir la forma en la que te expresas a través de tu estilo. 
-              En nuestro e-commerce, fusionamos moda urbana, confort y autenticidad para brindarte prendas únicas, versátiles y con identidad propia.
+              Somos una marca de ropa que nace con el propósito de redefinir la
+              forma en la que te expresas a través de tu estilo. En nuestro
+              e-commerce fusionamos moda urbana, confort y autenticidad para
+              brindarte prendas únicas, versátiles y con identidad propia.
             </p>
           </div>
-          <div className="col-md-6 image-right image-column">
+          <div className="col-md-6 image-column">
             <img
               src="src/images/1.png"
               alt="Nuestra marca"
@@ -25,18 +28,19 @@ const EcommercePage = () => {
         </div>
       </div>
 
-      {/* Sección de Contacto pegada al borde */}
-      <div className="contact-section">
-        <div className="container">
-          <div className="row justify-content-between align-items-center">
-            <div className="col-md-4 text-left" id="textizquierdoform">
-              <h2>Contáctanos</h2>
+      {/* Sección de Contacto */}
+      <section className="contact-section">
+        <div className="contact-container">
+          <div className="contact-row">
+            <div className="text-column-left">
+              <h2>Trabaja con nosotros</h2>
               <p>
-                ¿Quieres que trabajemos juntos? Ingresa tus datos y nos pondremos en contacto contigo.
+                ¿Quieres que trabajemos juntos? Ingresa tus datos y nos
+                pondremos en contacto contigo.
               </p>
             </div>
-            <div className="col-md-7 contact-form">
-              <form>
+            <div className="contact-form-wrapper">
+              <form className="contact-form">
                 <div className="row">
                   <div className="col-md-6">
                     <div className="form-group">
@@ -72,8 +76,6 @@ const EcommercePage = () => {
                   />
                 </div>
 
-                
-
                 <div className="form-group">
                   <label htmlFor="formMessageInput">Mensaje</label>
                   <textarea
@@ -83,27 +85,16 @@ const EcommercePage = () => {
                     placeholder="Escribe tu mensaje aquí..."
                   ></textarea>
                 </div>
-                <div className="form-group mt-3">
-                  <div className="form-check">
-                    <input
-                      type="checkbox"
-                      className="form-check-input"
-                      id="formSubscribeCheck"
-                    />
-                    <label className="form-check-label" htmlFor="formSubscribeCheck">
-                      Deseo recibir noticias y actualizaciones
-                    </label>
-                  </div>
-                </div>
 
-                <button type="submit" className="btn btn-dark mt-3 small-button">
+                <button type="submit" className="btn btn-dark submit-button">
                   ENVIAR
                 </button>
               </form>
             </div>
           </div>
         </div>
-      </div>
+      </section>
+
       <Footer />
     </>
   );

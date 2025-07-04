@@ -6,6 +6,10 @@
     align-items: center;
     padding: 40px 0;
   }
+
+  h4{
+    font-weight: bold;
+  }
   
   /* Caja del formulario de registro */
   .register-container {

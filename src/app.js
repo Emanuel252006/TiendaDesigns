@@ -8,6 +8,7 @@ import userRouter from './router/userRouter.js';
 import productRoutes from './router/productRoutes.js';
 import tallasRouter from './router/tallaRoutes.js';
 import productTallaRoutes from './router/productTallaRoutes.js';
+import carruselRoutes from './router/carruselRoutes.js';
 
 import { fileURLToPath } from 'url';
 import path from 'path';
@@ -28,10 +29,13 @@ app.use(express.json());
 app.use(morgan('dev'));
 app.use(cookieParser());
 
+const IMAGES_DIR = path.join(__dirname, "../images");
+console.log("Static images folder: ", IMAGES_DIR);
+app.use("/images", express.static(IMAGES_DIR));
 
-app.use('/images', express.static(path.join(__dirname, '../images')));
 app.use('/api/tallas', tallasRouter);
 app.use('/api/productTalla', productTallaRoutes);
+app.use("/api/carrusel", carruselRoutes);
 
 
 app.use('/api', authRouter);

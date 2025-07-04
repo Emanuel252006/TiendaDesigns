@@ -139,7 +139,14 @@ const tableCreationScripts = [
      Monto      DECIMAL(10,2) NOT NULL,
      FechaPago  DATETIME      DEFAULT GETDATE(),
      MetodoPago NVARCHAR(50)  NOT NULL
-   );`
+   );
+   -- 13) Carrusel: guarda las rutas de las imágenes y el orden en que aparecen
+CREATE TABLE Carrusel (
+  CarruselID INT IDENTITY(1,1) PRIMARY KEY,
+  ImagenPath NVARCHAR(255) NOT NULL,   -- ruta relativa, p.ej. '/uploads/carrusel/banner1.jpg'
+  Orden       INT          NOT NULL    -- controla la posición en el carrusel
+);
+   `
 ];
 
 // scripts para crear triggers

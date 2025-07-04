@@ -20,42 +20,51 @@ import {
  * Espera los datos del usuario y de la dirección en el cuerpo de la solicitud.
  */
 export const createUser = async (req, res) => {
-    // Desestructuramos los campos del usuario y de la dirección del req.body
-    const { 
-        NombreUsuario, 
-        Contrasena, 
-        Correo, 
-        Rol,
-        Direccion, // Campos de la dirección
-        Ciudad,
-        Pais,
-        CodigoPostal
-    } = req.body;
+  const {
+    NombreUsuario,
+    Contrasena,
+    Correo,
+    Rol,
+    Direccion,
+    Ciudad,
+    Pais,
+    CodigoPostal
+  } = req.body;
 
-    // Preparamos los objetos para el modelo
-    const userData = { NombreUsuario, Contrasena, Correo, Rol };
-    const addressData = { Direccion, Ciudad, Pais, CodigoPostal };
+  // 1) Validar duplicado de correo
+  const existing = await findUserByEmail(Correo);
+  if (existing.length > 0) {
+    return res.status(400).json({
+      Correo: 'Ya existe un usuario registrado con ese correo.'
+    });
+  }
 
-    try {
-        // Llamamos a la nueva función del modelo que maneja ambas inserciones en una transacción
-        const newUserAndAddress = await insertUserWithAddress(userData, addressData);
+  // 2) Preparar datos y hashear la contraseña
+  const hash = await bcrypt.hash(Contrasena, 10);
+  const userData = { NombreUsuario, Contrasena: hash, Correo, Rol };
+  const addressData = { Direccion, Ciudad, Pais, CodigoPostal };
 
-        console.log("📩 Usuario y Dirección registrados en createUser:", newUserAndAddress);
+  // 3) Insertar en transacción
+  try {
+    const newUserAndAddress = await insertUserWithAddress(userData, addressData);
 
-        if (!newUserAndAddress || !newUserAndAddress.UsuarioID) {
-            return res.status(500).json({ message: "Error al crear el usuario y/o dirección: No se insertaron filas." });
-        }
-
-        res.status(201).json({ 
-            message: "Usuario y dirección creados exitosamente", 
-            UsuarioID: newUserAndAddress.UsuarioID,
-            DireccionID: newUserAndAddress.DireccionID 
-        });
-    } catch (error) {
-        console.error("Error en createUser:", error.message);
-      
-        res.status(500).json({ message: "Error interno en el servidor al registrar usuario y dirección" });
+    if (!newUserAndAddress?.UsuarioID) {
+      return res.status(500).json({
+        message: 'Error al crear el usuario y la dirección.'
+      });
     }
+
+    res.status(201).json({
+      message: 'Usuario y dirección creados exitosamente.',
+      UsuarioID: newUserAndAddress.UsuarioID,
+      DireccionID: newUserAndAddress.DireccionID
+    });
+  } catch (error) {
+    console.error('Error en createUser:', error);
+    res.status(500).json({
+      message: 'Error interno al registrar usuario y dirección.'
+    });
+  }
 };
 
 
@@ -273,6 +282,6 @@ export const verifyToken = async (req, res) => {
         });
     } catch (error) {
         console.error("Error en verifyToken:", error);
-        res.status(500).json({ message: "Error interno del servidor al verificar el token.", error: error.message });
-    }
+        res.status(500).json({ message: "Error interno del servidor al verificar el token.", error: error.message });
+    }
 };

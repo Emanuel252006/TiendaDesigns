@@ -5,11 +5,13 @@
   padding: 0;
 }
 
-/* Contenedor principal sin padding, ocupa 100% altura */
+/* Contenedor principal con espacio para el menú */
 .product-page-wrapper {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  /* Ajusta este valor a la altura de tu navbar */
+  padding-top: 70px;
 }
 
 /* Contenido principal con padding */
@@ -20,6 +22,8 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 20px;
+  /* Hace que ambas columnas tengan la misma altura */
+  align-items: stretch;
 }
 
 /* Sección de imagen */
@@ -31,11 +35,15 @@
   padding: 10px;
 }
 
+/* Imagen forzada a cuadrado, recortada y centrada */
 .product-image {
-  max-width: 100%;
-  height: auto;
+  width: 100%;
+  max-width: 500px;    /* nunca excede 400px */
+  aspect-ratio: 1 / 1; /* alto igual al ancho */
+  object-fit: cover;   /* recorta centrado */
   border: 1px solid #ccc;
-  border-radius: 5px;
+  border-radius: 50%;
+  margin-top: 70px;
 }
 
 /* Sección de información */
@@ -43,19 +51,22 @@
   flex: 1 1 400px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: center;  /* centra verticalmente su contenido */
   padding: 50px;
   background-color: #f9f9f9;
   border-radius: 5px;
-  margin-top: 140px;
+  /* Si aún queda muy pegado, aumenta este margen */
+  margin-top: 70px;
 }
 
+/* Título del producto */
 .product-title {
   font-size: 2rem;
   margin-bottom: 10px;
   color: #333;
 }
 
+/* Precio del producto */
 .product-price {
   font-size: 1.5rem;
   font-weight: bold;
@@ -63,6 +74,7 @@
   color: #181717;
 }
 
+/* Descripción */
 .product-description {
   font-size: 1.1rem;
   margin-bottom: 20px;
