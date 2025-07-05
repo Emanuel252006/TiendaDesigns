@@ -159,11 +159,7 @@ export const login = async (req, res) => {
 
         const userFound = rows[0];
 
-        if (!userFound.Contrasena) {
-            return res.status(500).json({ message: "Error interno: La contraseña del usuario está ausente en la base de datos." });
-        }
-
-        const isMatch = await bcrypt.compare(Contrasena, userFound.Contrasena);
+        const isMatch = bcrypt.compare(Contrasena, userFound.Contrasena);
 
         if (!isMatch) {
             return res.status(400).json({ message: "Credenciales inválidas." });

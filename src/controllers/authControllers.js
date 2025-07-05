@@ -24,13 +24,9 @@ export const login = async (req, res) => {
 
         const userFound = rows[0];
 
-        // CAMBIO: Acceder a la contraseña con el nombre de columna correcto
-        if (!userFound.Contrasena) {
-            return res.status(400).json({ message: "La contraseña del usuario está ausente en la base de datos." });
-        }
 
         // CAMBIO: Comparar con el nombre de columna correcto
-        const isMatch = await bcrypt.compare(Contrasena, userFound.Contrasena);
+        const isMatch = bcrypt.compare(Contrasena, userFound.Contrasena);
 
         if (!isMatch) {
             return res.status(400).json({ message: "Credenciales inválidas." });

@@ -1,5 +1,3 @@
-/* src/PagesCss/AboutUs.css */
-
 /* Reset global */
 *,
 *::before,
@@ -8,157 +6,111 @@
   margin: 0;
   padding: 0;
 }
-html, body {
+html,
+body {
+  width: 100%;
+  height: 100%;
   overflow-x: hidden;
-  margin: 0;
-  padding: 0;
+  font-family: sans-serif;
 }
 
-/* “Acerca de la Marca” */
-.mt-spacing {
-  margin-top: 120px;
-}
-.ecommerce-page {
-  padding: 67.5px;
+/* Contenedor vertical */
+.about-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-.text-column {
-  padding: 200px;
-  text-align: justify;
-  font-size: x-large;
-}
-.text-column h2 {
-  text-align: center;
+  gap: 80px;
+  padding: 80px 20px;
+  margin-top: 90px;
 }
 
-/* Imagen de la marca */
-.image-column {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.rounded-image {
-  border-radius: 20px;
-  width: 100%;
-  max-width: 400px;
-  height: auto;
-}
-
-/* Sección de Contacto (gris) */
-.contact-section {
-  background-color: #f2f2f2;
-  /* padding-top y sides, sin padding-bottom para tocar al footer */
-  padding: 80px 20px 0 20px;
-  margin-bottom: 0;
-  display: flex;
-  justify-content: center;
-  /* make sure child margins don't collapse outside */
+/* Bloques de información */
+.info-block {
+  position: relative;
+  width: 80%;
+  max-width: 800px;
+  height: 300px;
   overflow: hidden;
-}
-.contact-container {
-  width: 100%;
-  max-width: 900px;
-}
-.contact-row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  justify-content: center;
-  align-items: center; /* centra verticalmente */
+  align-items: center;
 }
 
-/* Texto izquierdo centrado con el form */
-.text-column-left {
-  flex: 1 1 30%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center; /* centra verticalmente */
-  text-align: left;
-  margin-top: -120px;
-}
-.text-column-left h2,
-.text-column-left p {
-  margin: 0;  /* elimina márgenes colapsados */
+/* Primera sección: imagen a la izquierda */
+.info-block-first {
+  flex-direction: row;
 }
 
-/* Wrapper y form centrados */
-.contact-form-wrapper {
-  flex: 1 1 60%;
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* centra horizontalmente */
-}
-.contact-form {
-  width: 100%;
-  max-width: 500px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin: 0;       /* elimina márgenes */
-  padding: 0;      /* elimina padding */
+/* Segunda sección: imagen a la derecha */
+.info-block-second {
+  flex-direction: row-reverse;
 }
 
-/* Campos de la fila */
-.contact-form .row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin: 0;
-  padding: 0;
-}
-.contact-form .col-md-6 {
-  flex: 1 1 50%;
-}
-
-/* Etiquetas e inputs */
-.contact-form label {
-  font-weight: bold;
-  color: #444;
-  margin-bottom: 4px;
-}
-.contact-form .form-control {
-  border-radius: 24px;
-  border: 1.5px solid #555;
-  background-color: #f9f9f9;
-  color: #333;
-  padding: 12px;
-}
-
-/* Botón centrado */
-.submit-button {
-  align-self: center;
-  margin-top: 0;
-  margin-bottom: 20px;  /* opcional, para separarlo del footer */
-  width: 120px;
-  background-color: #222;
-  color: #fff;
+/* Imagen */
+.info-image {
+  width: 50%;
+  height: 100%;
+  object-fit: cover;
   border-radius: 16px;
-  border: none;
+  
 }
 
-
-/* Footer sin espacio superior */
-.footer {
-  margin-top: 0 !important;
-  background-color: #111;
-  color: #fff;
-  padding: 20px 0;
+/* Texto oculto */
+.info-text {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40%;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  color: #000;
+  border-radius: 8px;
+  line-height: 1.4;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-/* Responsivo */
+/* Posición inicial del texto en bloque 1 (derecha) */
+.info-block-first .info-text {
+  left: calc(50% + 20px);
+  transform: translate(20px, -50%);
+}
+
+/* Posición inicial del texto en bloque 2 (izquierda) */
+.info-block-second .info-text {
+  right: calc(50% + 20px);
+  transform: translate(-20px, -50%);
+}
+
+/* Hover: mostrar texto */
+.info-block:hover .info-text {
+  opacity: 1;
+  transform: translateX(0) translateY(-50%);
+  pointer-events: auto;
+}
+
+/* Responsive for tablets and mobiles */
 @media (max-width: 768px) {
-  .text-column { padding: 0; text-align: center; }
-  .contact-section { padding: 40px 20px 0; }
-  .contact-row { flex-direction: column; align-items: center; }
-  .submit-button { width: 100px; }
-  .contact-form .form-control { font-size: 14px; }
-}
-
-@media (max-width: 480px) {
-  .ecommerce-page { padding: 40px 15px; }
-  .text-column { padding: 0 10px; text-align: center; }
-  .rounded-image { max-width: 90%; }
-  .submit-button { width: 100%; padding: 10px; font-size: 14px; }
+  .about-container {
+    padding: 40px 10px;
+    gap: 40px;
+  }
+  .info-block {
+    flex-direction: column !important;
+    height: auto;
+  }
+  .info-image {
+    width: 100%;
+    height: auto;
+    margin-bottom: 16px;
+  }
+  .info-text {
+    position: static;
+    transform: none !important;
+    opacity: 1 !important;
+    pointer-events: auto;
+    background: transparent;
+    padding: 0;
+    width: 100%;
+  }
 }

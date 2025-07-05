@@ -1,32 +1,50 @@
-/* Carrusel principal */
+/* ---------- Carrusel Estilizado ---------- */
 #homeCarousel {
   margin-bottom: 2rem;
+  background-color: transparent;
+}
+
+.carousel-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.carousel-item {
+  transition: transform 0.6s ease;
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+  top: 50%;
+  transform: translateY(-50%);
+
 }
 
 .carousel-img {
-  width: 90%;
-  max-width: 1200px;
-  margin: 0 auto;
-  display: block;
-  max-height: 950px;
-  height: auto;
+  width: 100%;
+  height: 900px;
   object-fit: cover;
   object-position: center;
+  display: block;
+  margin-top: 100px;
 }
 
+/* Carrusel responsivo */
 @media (max-width: 991px) {
   .carousel-img {
-    max-height: 500px;
+    height: 360px;
   }
 }
 
 @media (max-width: 575px) {
   .carousel-img {
-    max-height: 300px;
+    height: 240px;
   }
 }
 
-/* Ajustar fuente y resets básicos */
+/* ---------- Fuente y resets ---------- */
 body {
   font-family: 'Arial', sans-serif;
   margin: 0;
@@ -34,13 +52,12 @@ body {
   background-color: #fff;
 }
 
-/* Header */
+/* ---------- Encabezado principal ---------- */
 .main-header {
   position: relative;
   margin-bottom: 2rem;
 }
 
-/* Centrar la imagen y ajustar tamaño */
 .header-image {
   text-align: center;
 }
@@ -71,7 +88,7 @@ body {
   margin: 0;
 }
 
-/* Catálogo de productos */
+/* ---------- Catálogo de productos ---------- */
 .product-catalog {
   padding: 3rem 0;
 }
@@ -94,7 +111,7 @@ body {
   border-radius: 50%;
 }
 
-/* Botones */
+/* ---------- Botones ---------- */
 .btn-primary,
 .btn-secondary {
   background-color: #000000;
@@ -107,7 +124,7 @@ body {
   border-color: #050505;
 }
 
-/* Footer */
+/* ---------- Footer ---------- */
 .footer {
   background-color: #181717;
   padding: 20px 0;
@@ -116,14 +133,14 @@ body {
   color: #ffffff;
 }
 
-/* Asegurar ancho completo */
+/* ---------- Container ajustado ---------- */
 .container {
   max-width: 100% !important;
   padding-left: 15px;
   padding-right: 15px;
 }
 
-/* Responsividad para pantallas medianas */
+/* ---------- Responsividad ---------- */
 @media (max-width: 991px) {
   .header-image img.header-img {
     height: 500px;
@@ -140,7 +157,6 @@ body {
   }
 }
 
-/* Responsividad para pantallas pequeñas */
 @media (max-width: 575px) {
   .header-image img.header-img {
     height: 300px;

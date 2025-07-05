@@ -1,30 +1,30 @@
 // src/Pages/HomePage.jsx
 import React, { useEffect, useState } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import "bootstrap/dist/css/bootstrap.min.css";           // solo CSS
 import "../PagesCss/HomePages.css";
-import { getProductsRequest } from "../api/productApi";
+import { Carousel } from "react-bootstrap";               // React-Bootstrap Carousel
 import Navigation from "../components/navegation.jsx";
 import DetalleButton from "../components/DetalleButton.jsx";
 import Footer from "../components/Footer.jsx";
 import CustomImage from "../components/CustomImage.jsx";
+import { getProductsRequest } from "../api/productApi";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5001";
 
 export default function HomePage() {
-  const [banners, setBanners] = useState([]);
+  const [banners, setBanners]     = useState([]);
   const [productos, setProductos] = useState([]);
 
   useEffect(() => {
+    // Carga banners
     fetch(`${API_BASE}/api/carrusel`)
-      .then((r) => r.json())
-      .then((data) =>
-        setBanners(data.sort((a, b) => a.Orden - b.Orden))
-      )
+      .then(res => res.json())
+      .then(data => setBanners(data.sort((a, b) => a.Orden - b.Orden)))
       .catch(console.error);
 
+    // Carga productos destacados
     getProductsRequest()
-      .then((data) => setProductos(data.slice(0, 4)))
+      .then(data => setProductos(data.slice(0, 4)))
       .catch(console.error);
   }, []);
 
@@ -32,56 +32,28 @@ export default function HomePage() {
     <>
       <Navigation />
 
-      {/* Carrusel */}
-      <div
-        id="homeCarousel"
-        className="carousel slide mb-5"
-        data-bs-ride="carousel"
-      >
-        <div className="carousel-inner">
-          {banners.length === 0 && (
-            <div className="carousel-item active">
-              <div
-                className="d-flex justify-content-center align-items-center"
-                style={{ height: 300 }}
-              >
-                Sin banners
-              </div>
-            </div>
-          )}
-          {banners.map((b, i) => (
-            <div
-              key={b.CarruselID}
-              className={`carousel-item${i === 0 ? " active" : ""}`}
-            >
-              <CustomImage
-                folder="carrusel"
-                filename={b.ImagenPath}
-                alt={`Banner ${i + 1}`}
-                className="d-block w-100 carousel-img"
-              />
-            </div>
-          ))}
-        </div>
-        {banners.length > 1 && (
-          <>
-            <button
-              className="carousel-control-prev"
-              type="button"
-              data-bs-target="#homeCarousel"
-              data-bs-slide="prev"
-            >
-              <span className="carousel-control-prev-icon" />
-            </button>
-            <button
-              className="carousel-control-next"
-              type="button"
-              data-bs-target="#homeCarousel"
-              data-bs-slide="next"
-            >
-              <span className="carousel-control-next-icon" />
-            </button>
-          </>
+      {/* Carrusel con autoplay cada 3s y sin pausa al hover */}
+      <div className="carousel-wrapper mb-5">
+        {banners.length === 0 ? (
+          <div className="no-banners">Sin banners</div>
+        ) : (
+          <Carousel
+            controls={banners.length > 1}
+            indicators={banners.length > 1}
+            interval={3000}
+            pause={false}
+          >
+            {banners.map((b, i) => (
+              <Carousel.Item key={b.CarruselID}>
+                <CustomImage
+                  folder="carrusel"
+                  filename={b.ImagenPath}
+                  alt={`Banner ${i + 1}`}
+                  className="d-block w-100 carousel-img"
+                />
+              </Carousel.Item>
+            ))}
+          </Carousel>
         )}
       </div>
 
@@ -91,7 +63,7 @@ export default function HomePage() {
           <h2 className="text-center mb-4">Productos Destacados</h2>
           <div className="row justify-content-center">
             {productos.length === 0 && <p>No hay productos.</p>}
-            {productos.map((p) => (
+            {productos.map(p => (
               <div
                 key={p.ProductoID}
                 className="col-lg-2 col-md-3 col-sm-4 mb-4 d-flex justify-content-center"
