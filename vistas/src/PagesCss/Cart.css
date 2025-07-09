@@ -127,3 +127,16 @@
   margin: 0 5px;
   font-size: 20px;
 }
+
+.ir-tienda-btn {
+  background-color: #000 !important;
+  border-color: #000 !important;
+  color: #fff !important;
+  display: block !important;
+  margin: 0 auto !important;
+}
+.ir-tienda-btn:hover {
+  background-color: #161616 !important;
+  border-color: #161616 !important;
+  color: #fff !important;
+}

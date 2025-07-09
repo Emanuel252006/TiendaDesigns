@@ -1,7 +1,7 @@
 // src/components/CustomImage.jsx
 import React, { useState } from "react";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5001";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
 const DEFAULT_SRC = `${API_BASE}/images/default.png`;
 
 export default function CustomImage({ folder, filename: raw, alt, className }) {

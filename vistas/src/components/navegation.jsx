@@ -3,10 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import './Sidebar.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useCart } from '../context/cartContext.jsx';
 
 const Navbar = () => {
   // Extraemos variables del contexto de autenticación
   const { isAuthenticated, logout, user } = useAuth();
+  const { cartSummary } = useCart();
   const navigate = useNavigate();
 
   // Función para manejar el cierre de sesión
@@ -44,36 +46,38 @@ const Navbar = () => {
         {/* Menú */}
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
-            {/* Dashboard Dropdown */}
-            <li className="nav-item dropdown">
-              <a
-                className="nav-link dropdown-toggle"
-                href="#"
-                id="dashboardDropdown"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                Dashboard
-              </a>
-              <ul className="dropdown-menu" aria-labelledby="dashboardDropdown">
-                <li>
-                  <Link className="dropdown-item" to="/dashboard/ventas">
-                    Ventas
-                  </Link>
-                </li>
-                <li>
-                  <Link className="dropdown-item" to="/dashboard/productos">
-                    Productos
-                  </Link>
-                </li>
-                <li>
-                  <Link className="dropdown-item" to="/dashboard/usuarios">
-                    Usuarios
-                  </Link>
-                </li>
-              </ul>
-            </li>
+            {/* Dashboard Dropdown solo para Admin */}
+            {isAuthenticated && user && user.Rol === 'Admin' && (
+              <li className="nav-item dropdown">
+                <a
+                  className="nav-link dropdown-toggle"
+                  href="#"
+                  id="dashboardDropdown"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  Dashboard
+                </a>
+                <ul className="dropdown-menu" aria-labelledby="dashboardDropdown">
+                  <li>
+                    <Link className="dropdown-item" to="/dashboard/ventas">
+                      Ventas
+                    </Link>
+                  </li>
+                  <li>
+                    <Link className="dropdown-item" to="/dashboard/productos">
+                      Productos
+                    </Link>
+                  </li>
+                  <li>
+                    <Link className="dropdown-item" to="/dashboard/usuarios">
+                      Usuarios
+                    </Link>
+                  </li>
+                </ul>
+              </li>
+            )}
 
             {/* Otros enlaces */}
             <li className="nav-item">
@@ -141,6 +145,11 @@ const Navbar = () => {
               <Link className="nav-link position-relative" to="/carrito">
                 <i className="bi bi-cart-fill margin-right-5"></i>
                 Carrito
+                {cartSummary.itemCount > 0 && (
+                  <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    {cartSummary.itemCount}
+                  </span>
+                )}
               </Link>
             </li>
           </ul>

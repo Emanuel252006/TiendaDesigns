@@ -8,7 +8,8 @@ import {
     login,
     logao,
     verifyToken,
-    profile
+    profile,
+    getUserForCheckout
 } from "../controllers/userController.js";
 
 import { requiredAuth } from "../middlewares/Token_validator.js";
@@ -40,7 +41,12 @@ router.put("/updateuser/:id", requiredAuth, updateUser);
 
 router.delete("/deleteuser/:id", requiredAuth, deleteUser);
 
+// Ruta para obtener el perfil del usuario autenticado
 router.get('/profile', requiredAuth, profile);
+
+
+
+router.get('/checkout-data', requiredAuth, getUserForCheckout);
 
 
 export default router;

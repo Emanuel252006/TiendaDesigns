@@ -1,6 +1,3 @@
-
-
-
 /* Contenedor principal */
 .page-wrapper {
   width: 100%;
@@ -52,6 +49,19 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 1rem;
+}
+
+/* Mensajes de error */
+.error-message {
+  color: #dc3545;
+  font-size: 0.875rem;
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0.25rem 0 0 0;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  display: block;
 }
 
 /* Agrupación de detalles (País, Ciudad, Código Postal) */
@@ -135,6 +145,3 @@
 .footer-icons a:hover {
   color: #ddd;
 }
-
-  
-  

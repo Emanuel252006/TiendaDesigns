@@ -104,6 +104,8 @@ const tableCreationScripts = [
                               FOREIGN KEY REFERENCES Carritos(CarritoID),
      ProductoID        INT NOT NULL 
                               FOREIGN KEY REFERENCES Productos(ProductoID),
+     TallaID           INT 
+                              FOREIGN KEY REFERENCES Tallas(TallaID),
      Cantidad          INT NOT NULL
    );`,
 
@@ -269,7 +271,6 @@ export const connectBD = async () => {
     }
 
     connectedPool = pool;
-    console.log(`Conectado a BD "${process.env.DB_NAME}"`);
     return pool;
 
   } catch (error) {
@@ -283,4 +284,16 @@ export const connectBD = async () => {
 export const getPool = async () => {
   if (!connectedPool) await connectBD();
   return connectedPool;
+};
+
+export const getConnection = async () => {
+  try {
+    if (!connectedPool) {
+      connectedPool = await connectBD();
+    }
+    return connectedPool;
+  } catch (error) {
+    console.error('Error connecting to database:', error);
+    throw error;
+  }
 };

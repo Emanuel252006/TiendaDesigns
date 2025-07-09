@@ -159,7 +159,7 @@ export const login = async (req, res) => {
 
         const userFound = rows[0];
 
-        const isMatch = bcrypt.compare(Contrasena, userFound.Contrasena);
+        const isMatch = await bcrypt.compare(Contrasena, userFound.Contrasena);
 
         if (!isMatch) {
             return res.status(400).json({ message: "Credenciales inválidas." });
@@ -278,6 +278,63 @@ export const verifyToken = async (req, res) => {
         });
     } catch (error) {
         console.error("Error en verifyToken:", error);
-        res.status(500).json({ message: "Error interno del servidor al verificar el token.", error: error.message });
-    }
+        res.status(500).json({ message: "Error interno del servidor al verificar el token.", error: error.message });
+    }
+};
+
+// Obtener datos básicos del usuario para checkout
+export const getUserForCheckout = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    const checkoutData = await getUserByIdModel(userId);
+    
+    if (checkoutData.length === 0) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    const user = checkoutData[0];
+    
+    res.status(200).json({
+      nombre: user.NombreUsuario,
+      email: user.Correo,
+      direccion: user.Direccion,
+      ciudad: user.Ciudad,
+      pais: user.Pais,
+      codigoPostal: user.CodigoPostal
+    });
+  } catch (error) {
+    console.error("Error en getUserForCheckout:", error);
+    res.status(500).json({ message: "Error al obtener datos del usuario" });
+  }
+};
+
+/**
+ * Cambia la contraseña del usuario autenticado.
+ * Espera la contraseña actual y la nueva en el cuerpo de la solicitud.
+ */
+export const changePassword = async (req, res) => {
+    try {
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ message: "No autenticado. ID de usuario no disponible." });
+        }
+        const { currentPassword, newPassword } = req.body;
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ message: "Se requieren la contraseña actual y la nueva contraseña." });
+        }
+        const result = await getUserByIdModel(req.user.id);
+        if (result.length === 0) {
+            return res.status(404).json({ message: "Usuario no encontrado" });
+        }
+        const userFound = result[0];
+        const isMatch = await bcrypt.compare(currentPassword, userFound.Contrasena);
+        if (!isMatch) {
+            return res.status(400).json({ message: "La contraseña actual es incorrecta." });
+        }
+        const hash = await bcrypt.hash(newPassword, 10);
+        await updateUserById(req.user.id, { Contrasena: hash }, {}, undefined);
+        res.status(200).json({ message: "Contraseña actualizada exitosamente." });
+    } catch (error) {
+        res.status(500).json({ message: "Error al cambiar la contraseña", error: error.message });
+    }
 };

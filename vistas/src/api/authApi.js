@@ -69,5 +69,41 @@ export const createPersona = async (personaData) => {
   }
 };
 
+export const loginRequest = async (user) => {
+  try {
+    const res = await axios.post("/api/login", user);
+    return res;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const registerRequest = async (user) => {
+  try {
+    const res = await axios.post("/api/userregister", user);
+    return res;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const forgotPasswordRequest = async (correo) => {
+  try {
+    const res = await axios.post("/forgot-password", { correo });
+    return res.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Error solicitando código de recuperación.' };
+  }
+};
+
+export const resetPasswordRequest = async ({ correo, codigo, nuevaContrasena }) => {
+  try {
+    const res = await axios.post("/reset-password", { correo, codigo, nuevaContrasena });
+    return res.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Error restableciendo la contraseña.' };
+  }
+};
+
 
 

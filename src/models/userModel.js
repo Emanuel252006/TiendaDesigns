@@ -1,6 +1,7 @@
 import { getPool } from "../db.js"; // Importamos correctamente la función getPool
 import sql from 'mssql'; // Necesitamos importar 'mssql' para los tipos de datos
 import bcrypt from 'bcryptjs'; // Asegúrate de tener bcryptjs importado para el hashing
+import jwt from 'jsonwebtoken'; // Importamos jsonwebtoken para manejar tokens JWT
 
 /**
  * Busca un usuario por su nombre de usuario o ID en la base de datos.
@@ -43,7 +44,6 @@ export const insertAddress = async (UsuarioID, address) => {
             VALUES (@UsuarioID, @Direccion, @Ciudad, @Pais, @CodigoPostal);
         `);
 
-        console.log("✔ Dirección insertada:", result.recordset);
         return result.recordset.length > 0 ? result.recordset[0] : null;
     } catch (error) {
         console.error("❌ Error en insertAddress:", error.message);
@@ -63,11 +63,9 @@ export const insertUserWithAddress = async (user, address) => {
 
         const request = new sql.Request(transaction);
 
-        
-        const passwordHash = await bcrypt.hash(Contrasena, 10); 
-
+        // La contraseña ya viene hasheada desde el controlador
         request.input("NombreUsuario", sql.NVarChar(100), NombreUsuario);
-        request.input("Contrasena", sql.NVarChar(255), passwordHash); 
+        request.input("Contrasena", sql.NVarChar(255), Contrasena); 
         request.input("Correo", sql.NVarChar(100), Correo);
         request.input("Rol", sql.NVarChar(50), Rol);
 
@@ -82,7 +80,6 @@ export const insertUserWithAddress = async (user, address) => {
         }
 
         const newUserId = userResult.recordset[0].UsuarioID;
-        console.log("✔ Usuario insertado con ID:", newUserId);
 
        
         const addressRequest = new sql.Request(transaction); 
@@ -103,7 +100,6 @@ export const insertUserWithAddress = async (user, address) => {
         }
 
         const newAddressId = addressResult.recordset[0].DireccionID;
-        console.log("✔ Dirección insertada con ID:", newAddressId);
 
         await transaction.commit(); 
 
@@ -117,7 +113,6 @@ export const insertUserWithAddress = async (user, address) => {
     } catch (error) {
         if (transaction) {
             await transaction.rollback(); 
-            console.error("❌ Transacción revertida debido a un error.");
         }
         console.error("❌ Error en insertUserWithAddress:", error.message);
         throw error;
@@ -134,6 +129,7 @@ export const getAllUsers = async () => {
             SELECT 
                 U.UsuarioID, 
                 U.NombreUsuario, 
+                U.Contrasena,
                 U.Correo, 
                 U.FechaRegistro, 
                 U.Rol,
@@ -162,6 +158,7 @@ export const getUserById = async (id) => {
             SELECT 
                 U.UsuarioID, 
                 U.NombreUsuario, 
+                U.Contrasena,
                 U.Correo, 
                 U.FechaRegistro, 
                 U.Rol,
@@ -215,9 +212,6 @@ export const updateUserById = async (id, userFields, addressFields, plainPasswor
             request.input('id', sql.Int, id); 
             const userResult = await request.query(userQuery);
             rowsAffectedUser = userResult.rowsAffected[0];
-            console.log(`Usuario con ID ${id} actualizado. Filas afectadas: ${rowsAffectedUser}`);
-        } else {
-            console.warn('No se proporcionaron campos para actualizar el usuario.');
         }
 
         let rowsAffectedAddress = 0;
@@ -251,17 +245,13 @@ export const updateUserById = async (id, userFields, addressFields, plainPasswor
                     const addressQuery = `UPDATE Direcciones SET ${addressUpdateClauses.join(', ')} WHERE UsuarioID = @UsuarioID_Addr`;
                     const addressResult = await addressRequest.query(addressQuery);
                     rowsAffectedAddress = addressResult.rowsAffected[0];
-                    console.log(`Dirección del usuario con ID ${id} actualizada. Filas afectadas: ${rowsAffectedAddress}`);
                 } else {
                     // Si no hay una dirección existente, insertamos una nueva
-                    console.log(`No se encontró dirección para el usuario ${id}. Insertando nueva dirección.`);
                     const newAddress = await insertAddress(id, addressFields);
                     if (newAddress) {
                         rowsAffectedAddress = 1; // Consideramos una fila afectada por la inserción
                     }
                 }
-            } else {
-                console.warn('No se proporcionaron campos para actualizar la dirección.');
             }
         }
 
@@ -275,7 +265,6 @@ export const updateUserById = async (id, userFields, addressFields, plainPasswor
     } catch (error) {
         if (transaction) {
             await transaction.rollback(); 
-            console.error("❌ Transacción de actualización revertida debido a un error.");
         }
         console.error('Error in updateUserById:', error);
         throw error;
@@ -294,12 +283,10 @@ export const deleteUserById = async (id) => {
       
         const deleteAddressesResult = await request.input('id_addr', sql.Int, id)
                                                 .query("DELETE FROM Direcciones WHERE UsuarioID = @id_addr");
-        console.log(`Direcciones eliminadas para UsuarioID ${id}. Filas afectadas: ${deleteAddressesResult.rowsAffected[0]}`);
         
        
         const deleteUserResult = await request.input('id_user', sql.Int, id)
                                             .query("DELETE FROM Usuarios WHERE UsuarioID = @id_user");
-        console.log(`Usuario con ID ${id} eliminado. Filas afectadas: ${deleteUserResult.rowsAffected[0]}`);
 
         await transaction.commit(); 
 
@@ -309,7 +296,6 @@ export const deleteUserById = async (id) => {
     } catch (error) {
         if (transaction) {
             await transaction.rollback(); // Revertir la transacción en caso de error
-            console.error("❌ Transacción de eliminación revertida debido a un error.");
         }
         console.error('Error in deleteUserById:', error);
         throw error;
@@ -329,8 +315,22 @@ export const findUserByUsername = async (Nombre_Usuario) => {
     }
 };
 
+
+
+export const findUserByEmail = async (email) => {
+    try {
+        const pool = await getPool();
+        const result = await pool.request()
+            .input('Correo', sql.NVarChar(100), email)
+            .query('SELECT UsuarioID, NombreUsuario, Contrasena, Correo, Rol FROM Usuarios WHERE Correo = @Correo');
+        return result.recordset;
+    } catch (error) {
+        console.error('Error in findUserByEmail:', error);
+        throw error;
+    }
+};
+
 export const verifyToken = async (req, res) => {
-    
     const { token } = req.cookies;
 
     if (!token) {
@@ -338,7 +338,6 @@ export const verifyToken = async (req, res) => {
     }
 
     try {
-       
         jwt.verify(token, TOKEN_SECRET, async (err, decodedTokenPayload) => { 
             if (err) {
                 return res.status(403).json({ message: "Token de autenticación inválido o expirado." });
@@ -358,7 +357,6 @@ export const verifyToken = async (req, res) => {
                 NombreUsuario: userFound.NombreUsuario,
                 Correo: userFound.Correo,
                 Rol: userFound.Rol,
-               
                 DireccionID: userFound.DireccionID,
                 Direccion: userFound.Direccion,
                 Ciudad: userFound.Ciudad,
@@ -369,19 +367,5 @@ export const verifyToken = async (req, res) => {
     } catch (error) {
         console.error("Error en verifyToken:", error);
         res.status(500).json({ message: "Error interno del servidor al verificar el token." });
-    }
-    
-};
-
-export const findUserByEmail = async (email) => {
-    try {
-        const pool = await getPool();
-        const result = await pool.request()
-            .input('Correo', sql.NVarChar(100), email)
-            .query('SELECT UsuarioID, NombreUsuario, Contrasena, Correo, Rol FROM Usuarios WHERE Correo = @Correo');
-        return result.recordset;
-    } catch (error) {
-        console.error('Error in findUserByEmail:', error);
-        throw error;
     }
 };

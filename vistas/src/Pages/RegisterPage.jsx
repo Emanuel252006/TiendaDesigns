@@ -1,7 +1,9 @@
 // src/pages/RegisterPages.jsx
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { startRegisterRequest, verifyRegisterCodeRequest } from "../api/userApi";
+import VerificationModal from "../components/VerificationModal";
 import {
   Container,
   Row,
@@ -19,30 +21,92 @@ import Footer from "../components/Footer.jsx";
 function RegisterPages() {
   const navigate = useNavigate();
   const { signup, errors: authErrors, loading } = useAuth();
-  const { register, handleSubmit } = useForm();
+  const { register, handleSubmit, reset } = useForm();
   const [successMsg, setSuccessMsg] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [modalCorreo, setModalCorreo] = useState("");
+  const [modalError, setModalError] = useState("");
+  const [modalLoading, setModalLoading] = useState(false);
+  const [registerSuccess, setRegisterSuccess] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendMsg, setResendMsg] = useState("");
+  const [resendDisabled, setResendDisabled] = useState(false);
+  const [errors, setErrors] = useState({});
+  const userDataRef = useRef(null); // Para guardar los datos originales
+  let resendTimeout = null;
+
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      const t = setTimeout(() => setErrors({}), 4000);
+      return () => clearTimeout(t);
+    }
+  }, [errors]);
 
   const onSubmit = async (data) => {
-    if (data.password !== data.confirmPassword) {
-      return alert("Las contraseñas no coinciden.");
+    setErrors({});
+    setRegisterSuccess(false);
+    setSuccessMsg("");
+    try {
+      // Forzar Rol a 'Cliente' siempre
+      const dataWithRol = { ...data, Rol: 'Cliente' };
+      const res = await startRegisterRequest(dataWithRol);
+      setModalCorreo(data.Correo);
+      setShowModal(true);
+      setModalError("");
+      userDataRef.current = dataWithRol; // Guardar datos para reenvío
+    } catch (err) {
+      const payload = err.response?.data;
+      if (payload && typeof payload === "object") setErrors(payload);
+      else setErrors({ general: payload?.message || "Error al registrar." });
     }
+  };
 
-    const result = await signup({
-      NombreUsuario: data.nombreUsuario,
-      Correo: data.email,
-      Contrasena: data.password,
-      Rol: "Cliente",
-      Direccion: data.direccion,
-      Ciudad: data.ciudad,
-      Pais: data.pais,
-      CodigoPostal: data.codigoPostal,
-    });
-
-    if (result.success) {
-      setSuccessMsg("¡Cuenta creada con éxito! Redirigiendo a iniciar sesión…");
-      setTimeout(() => navigate("/login"), 1500);
+  const handleVerifyCode = async (code) => {
+    setModalLoading(true);
+    setModalError("");
+    try {
+      const res = await verifyRegisterCodeRequest({ Correo: modalCorreo, code });
+      setRegisterSuccess(true);
+      setShowModal(false);
+      setSuccessMsg("¡Registro exitoso! Redirigiendo a iniciar sesión…");
+      reset();
+      setTimeout(() => {
+        setSuccessMsg("");
+        navigate("/login");
+      }, 2000);
+    } catch (err) {
+      const payload = err.response?.data;
+      if (payload?.code) setModalError(payload.code);
+      else setModalError(payload?.message || "Error al verificar el código.");
+    } finally {
+      setModalLoading(false);
     }
-    // Si falla, authErrors contiene los mensajes que ya se muestran abajo
+  };
+
+  const handleResend = async () => {
+    setResendLoading(true);
+    setResendMsg("");
+    try {
+      // Reenviar con los datos originales, asegurando Rol: 'Cliente'
+      const resendData = userDataRef.current
+        ? { ...userDataRef.current, Rol: 'Cliente' }
+        : { Correo: modalCorreo, Rol: 'Cliente' };
+      await startRegisterRequest(resendData);
+      setResendMsg("¡Código reenviado! Revisa tu correo.");
+      setResendDisabled(true);
+      resendTimeout = setTimeout(() => setResendDisabled(false), 30000); // 30s cooldown
+    } catch (err) {
+      // Si hay errores de validación, mostrarlos en el formulario y cerrar el modal
+      const payload = err.response?.data;
+      if (payload && typeof payload === "object") {
+        setShowModal(false);
+        setErrors(payload);
+      } else {
+        setResendMsg("No se pudo reenviar el código. Intenta más tarde.");
+      }
+    } finally {
+      setResendLoading(false);
+    }
   };
 
   return (
@@ -64,12 +128,10 @@ function RegisterPages() {
                     <Form.Control
                       type="text"
                       placeholder="Ingresa tu nombre de usuario"
-                      {...register("nombreUsuario")}
+                      {...register("NombreUsuario")}
                     />
-                    {authErrors.NombreUsuario && (
-                      <Form.Text className="text-danger">
-                        {authErrors.NombreUsuario}
-                      </Form.Text>
+                    {errors.NombreUsuario && (
+                      <div className="error-message">{Array.isArray(errors.NombreUsuario) ? errors.NombreUsuario[0] : errors.NombreUsuario}</div>
                     )}
                   </Form.Group>
 
@@ -77,14 +139,12 @@ function RegisterPages() {
                   <Form.Group controlId="email" className="form-group-custom">
                     <Form.Label>Email</Form.Label>
                     <Form.Control
-                      type="email"
-                      placeholder="Ingresa tu email"
-                      {...register("email")}
+                      type="text"
+                      placeholder="Ingresa tu correo"
+                      {...register("Correo")}
                     />
-                    {authErrors.Correo && (
-                      <Form.Text className="text-danger">
-                        {authErrors.Correo}
-                      </Form.Text>
+                    {errors.Correo && (
+                      <div className="error-message">{Array.isArray(errors.Correo) ? errors.Correo[0] : errors.Correo}</div>
                     )}
                   </Form.Group>
 
@@ -94,12 +154,10 @@ function RegisterPages() {
                     <Form.Control
                       type="password"
                       placeholder="Ingresa tu contraseña"
-                      {...register("password")}
+                      {...register("Contrasena")}
                     />
-                    {authErrors.Contrasena && (
-                      <Form.Text className="text-danger">
-                        {authErrors.Contrasena}
-                      </Form.Text>
+                    {errors.Contrasena && (
+                      <div className="error-message">{Array.isArray(errors.Contrasena) ? errors.Contrasena[0] : errors.Contrasena}</div>
                     )}
                   </Form.Group>
 
@@ -114,15 +172,18 @@ function RegisterPages() {
                       placeholder="Confirma tu contraseña"
                       {...register("confirmPassword")}
                     />
-                  </Form.Group>
-                  {authErrors.general &&
-                    authErrors.general
-                      .toLowerCase()
-                      .includes("contraseña") && (
-                      <Form.Text className="text-danger">
-                        {authErrors.general}
-                      </Form.Text>
+                    {errors.confirmPassword && (
+                      <div className="error-message">{Array.isArray(errors.confirmPassword) ? errors.confirmPassword[0] : errors.confirmPassword}</div>
                     )}
+                    {authErrors.general &&
+                      authErrors.general
+                        .toLowerCase()
+                        .includes("contraseña") && (
+                        <Form.Text className="text-danger">
+                          {authErrors.general}
+                        </Form.Text>
+                      )}
+                  </Form.Group>
 
                   <h4 className="mt-4 mb-3">Información de Dirección</h4>
 
@@ -135,12 +196,10 @@ function RegisterPages() {
                     <Form.Control
                       type="text"
                       placeholder="Ej: Carrera 80 #15-20"
-                      {...register("direccion")}
+                      {...register("Direccion")}
                     />
-                    {authErrors.Direccion && (
-                      <Form.Text className="text-danger">
-                        {authErrors.Direccion}
-                      </Form.Text>
+                    {errors.Direccion && (
+                      <div className="error-message">{Array.isArray(errors.Direccion) ? errors.Direccion[0] : errors.Direccion}</div>
                     )}
                   </Form.Group>
 
@@ -149,30 +208,24 @@ function RegisterPages() {
                     <Form.Label>Ciudad</Form.Label>
                     <Form.Control
                       type="text"
-                      placeholder="Ingresa tu ciudad"
-                      {...register("ciudad")}
+                      placeholder="Ej: Medellín"
+                      {...register("Ciudad")}
                     />
-                    {authErrors.Ciudad && (
-                      <Form.Text className="text-danger">
-                        {authErrors.Ciudad}
-                      </Form.Text>
+                    {errors.Ciudad && (
+                      <div className="error-message">{Array.isArray(errors.Ciudad) ? errors.Ciudad[0] : errors.Ciudad}</div>
                     )}
                   </Form.Group>
 
                   {/* País */}
                   <Form.Group controlId="pais" className="form-group-custom">
                     <Form.Label>País</Form.Label>
-                    <Form.Select {...register("pais")}>
-                      <option value="">Seleccione un país</option>
-                      <option value="Colombia">Colombia</option>
-                      <option value="Ecuador">Ecuador</option>
-                      <option value="Venezuela">Venezuela</option>
-                      <option value="Brasil">Brasil</option>
-                    </Form.Select>
-                    {authErrors.Pais && (
-                      <Form.Text className="text-danger">
-                        {authErrors.Pais}
-                      </Form.Text>
+                    <Form.Control
+                      type="text"
+                      placeholder="Ej: Colombia"
+                      {...register("Pais")}
+                    />
+                    {errors.Pais && (
+                      <div className="error-message">{Array.isArray(errors.Pais) ? errors.Pais[0] : errors.Pais}</div>
                     )}
                   </Form.Group>
 
@@ -184,13 +237,11 @@ function RegisterPages() {
                     <Form.Label>Código Postal</Form.Label>
                     <Form.Control
                       type="text"
-                      placeholder="Ingresa tu código postal"
-                      {...register("codigoPostal")}
+                      placeholder="Ej: 050021"
+                      {...register("CodigoPostal")}
                     />
-                    {authErrors.CodigoPostal && (
-                      <Form.Text className="text-danger">
-                        {authErrors.CodigoPostal}
-                      </Form.Text>
+                    {errors.CodigoPostal && (
+                      <div className="error-message">{Array.isArray(errors.CodigoPostal) ? errors.CodigoPostal[0] : errors.CodigoPostal}</div>
                     )}
                   </Form.Group>
 
@@ -203,22 +254,19 @@ function RegisterPages() {
 
                   {/* Botón de envío */}
                   <Button
-                    variant="primary"
+                    variant="dark"
                     type="submit"
-                    className="register-button mt-3"
+                    className="register-button btn btn-dark mt-3"
                     disabled={loading}
                   >
                     {loading ? (
-                      <>
-                        <Spinner
-                          as="span"
-                          animation="border"
-                          size="sm"
-                          role="status"
-                          aria-hidden="true"
-                        />{" "}
-                        Registrando...
-                      </>
+                      <Spinner
+                        as="span"
+                        animation="border"
+                        size="sm"
+                        role="status"
+                        aria-hidden="true"
+                      />
                     ) : (
                       "Registrarse"
                     )}
@@ -230,8 +278,20 @@ function RegisterPages() {
         </Container>
       </section>
       <Footer />
+      <VerificationModal
+        show={showModal}
+        onClose={() => setShowModal(false)}
+        onVerify={handleVerifyCode}
+        onResend={handleResend}
+        correo={modalCorreo}
+        error={modalError}
+        loading={modalLoading}
+        resendMsg={resendMsg}
+        resendLoading={resendLoading}
+        resendDisabled={resendDisabled}
+      />
     </>
   );
 }
 
-export default RegisterPages;
+export default RegisterPages;

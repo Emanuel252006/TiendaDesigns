@@ -4,6 +4,9 @@ import {
   registerRequest,
   verifyTokenRequest,
   logao,
+  getProfileRequest,
+  updateProfileRequest,
+  changePasswordRequest,
 } from "../api/userApi";
 import Cookies from "js-cookie";
 
@@ -30,25 +33,30 @@ const signup = async (userData) => {
     const payload = err.response?.data;
     const mapped = {};
 
-    // 1) Caso correo duplicado (objeto con clave "Correo")
-    if (payload && typeof payload === "object" && !Array.isArray(payload) && payload.Correo) {
-      mapped.Correo = payload.Correo;
-      setErrors(mapped);
-      return { success: false };
-    }
-
-    // 2) Validaciones tipo array (por ejemplo express-validator)
-    if (Array.isArray(payload)) {
+    // Manejar errores de validación del registro
+    if (payload && typeof payload === "object" && !Array.isArray(payload)) {
+      // Los errores ya vienen en formato de objeto con las claves de los campos
+      Object.entries(payload).forEach(([key, val]) => {
+        mapped[key] = Array.isArray(val) ? val.join(" / ") : val;
+      });
+    } else if (Array.isArray(payload)) {
+      // Fallback para arrays (por si acaso)
       payload.forEach((msg) => {
         const l = msg.toLowerCase();
-        if (l.includes("correo")) mapped.Correo = msg;
+        if (l.includes("confirmación") || l.includes("confirmacion") || l.includes("coinciden") || l.includes("no coinciden"))
+          mapped.confirmPassword = msg;
+        else if (l.includes("correo") || l.includes("email"))
+          mapped.Correo = msg;
         else if (l.includes("contraseña") || l.includes("contrasena"))
           mapped.Contrasena = msg;
-        else if (l.includes("usuario")) mapped.NombreUsuario = msg;
+        else if (l.includes("usuario") || l.includes("nombre"))
+          mapped.NombreUsuario = msg;
         else if (l.includes("dirección") || l.includes("direccion"))
           mapped.Direccion = msg;
-        else if (l.includes("ciudad")) mapped.Ciudad = msg;
-        else if (l.includes("país") || l.includes("pais")) mapped.Pais = msg;
+        else if (l.includes("ciudad"))
+          mapped.Ciudad = msg;
+        else if (l.includes("país") || l.includes("pais"))
+          mapped.Pais = msg;
         else if (
           l.includes("código postal") ||
           l.includes("codigo postal") ||
@@ -61,23 +69,11 @@ const signup = async (userData) => {
             : msg;
         }
       });
-    }
-    // 3) Validaciones tipo objeto genérico (sin message)
-    else if (payload && typeof payload === "object" && !payload.message) {
-      Object.entries(payload).forEach(([key, val]) => {
-        mapped[key] = Array.isArray(val) ? val.join(" / ") : val;
-      });
-    }
-    // 4) Mensaje string puro
-    else if (typeof payload === "string") {
+    } else if (typeof payload === "string") {
       mapped.general = payload;
-    }
-    // 5) Error con message
-    else if (payload?.message) {
+    } else if (payload?.message) {
       mapped.general = payload.message;
-    }
-    // 6) Fallback
-    else {
+    } else {
       mapped.general = "Error inesperado al registrar.";
     }
 
@@ -100,7 +96,15 @@ const signup = async (userData) => {
       const payload = err.response?.data;
       const mapped = {};
 
-      if (Array.isArray(payload)) {
+      // Log para depuración
+      console.log('Respuesta de error en login:', payload);
+
+      if (payload && typeof payload === "object" && !Array.isArray(payload)) {
+        // Si es un objeto tipo { Correo: 'msg', Contrasena: 'msg' }
+        Object.entries(payload).forEach(([key, val]) => {
+          mapped[key] = Array.isArray(val) ? val.join(" / ") : val;
+        });
+      } else if (Array.isArray(payload)) {
         payload.forEach((msg) => {
           const l = msg.toLowerCase();
           if (l.includes("correo")) mapped.Correo = msg;
@@ -134,6 +138,79 @@ const signup = async (userData) => {
       setErrors({});
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  // --------------------
+  // loadProfile: carga el perfil completo del usuario
+  // --------------------
+  const loadProfile = async () => {
+    try {
+      const res = await getProfileRequest();
+      setUser(res.data);
+      return { success: true };
+    } catch (err) {
+      console.error("Error al cargar el perfil:", err);
+      return { success: false };
+    }
+  };
+
+  // --------------------
+  // updateProfile: actualiza el perfil del usuario
+  // --------------------
+  const updateProfile = async (profileData) => {
+    try {
+      const res = await updateProfileRequest(profileData);
+      setErrors({});
+      // Actualizar el usuario en el contexto con los nuevos datos
+      setUser(prevUser => ({ ...prevUser, ...profileData }));
+      return { success: true };
+    } catch (err) {
+      const payload = err.response?.data;
+      const mapped = {};
+
+      // Manejar errores de validación del perfil
+      if (payload && typeof payload === "object" && !Array.isArray(payload)) {
+        // Los errores ya vienen en formato de objeto con las claves de los campos
+        Object.entries(payload).forEach(([key, val]) => {
+          mapped[key] = Array.isArray(val) ? val.join(" / ") : val;
+        });
+      } else if (Array.isArray(payload)) {
+        // Fallback para arrays (por si acaso)
+        payload.forEach((msg) => {
+          const l = msg.toLowerCase();
+          if (l.includes("correo") || l.includes("email"))
+            mapped.Correo = msg;
+          else if (l.includes("usuario") || l.includes("nombre"))
+            mapped.NombreUsuario = msg;
+          else if (l.includes("dirección") || l.includes("direccion"))
+            mapped.Direccion = msg;
+          else if (l.includes("ciudad"))
+            mapped.Ciudad = msg;
+          else if (l.includes("país") || l.includes("pais"))
+            mapped.Pais = msg;
+          else if (
+            l.includes("código postal") ||
+            l.includes("codigo postal") ||
+            l.includes("codigopostal")
+          ) {
+            mapped.CodigoPostal = msg;
+          } else {
+            mapped.general = mapped.general
+              ? mapped.general + " / " + msg
+              : msg;
+          }
+        });
+      } else if (typeof payload === "string") {
+        mapped.general = payload;
+      } else if (payload?.message) {
+        mapped.general = payload.message;
+      } else {
+        mapped.general = "Error inesperado al actualizar el perfil.";
+      }
+
+      setErrors(mapped);
+      return { success: false };
     }
   };
 
@@ -178,12 +255,14 @@ const signup = async (userData) => {
     })();
   }, []);
 
-  return (
+    return (
     <AuthContext.Provider
       value={{
         signup,
         signin,
         logout,
+        loadProfile,
+        updateProfile,
         user,
         isAuthenticated,
         errors,
@@ -192,5 +271,5 @@ const signup = async (userData) => {
     >
       {children}
     </AuthContext.Provider>
-  );
+  );
 };

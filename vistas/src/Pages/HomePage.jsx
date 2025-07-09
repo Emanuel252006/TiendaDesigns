@@ -9,7 +9,7 @@ import Footer from "../components/Footer.jsx";
 import CustomImage from "../components/CustomImage.jsx";
 import { getProductsRequest } from "../api/productApi";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5001";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
 export default function HomePage() {
   const [banners, setBanners]     = useState([]);
@@ -90,8 +90,8 @@ export default function HomePage() {
             ))}
           </div>
           <div className="row mt-4">
-            <div className="col text-center">
-              <a href="/tienda" className="btn btn-secondary">
+            <div className="col d-flex justify-content-center">
+              <a href="/tienda" className="btn btn-secondary ver-todo-btn">
                 VER TODO
               </a>
             </div>

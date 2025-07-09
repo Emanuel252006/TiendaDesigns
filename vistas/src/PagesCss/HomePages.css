@@ -124,6 +124,41 @@ body {
   border-color: #050505;
 }
 
+/* ---------- Botón VER TODO específico ---------- */
+.ver-todo-btn {
+  font-family: 'Arial', sans-serif !important;
+  font-size: 1rem !important;
+  font-weight: 400 !important;
+  background-color: #000 !important;
+  border-color: #000 !important;
+  color: #fff !important;
+  padding: 10px 20px !important;
+  border-radius: 4px;
+  box-shadow: none;
+  display: inline-block;
+  text-align: center;
+  margin: 0 auto;
+  min-width: 120px;
+  width: auto !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+
+.ver-todo-btn:hover {
+  background-color: #161616 !important;
+  border-color: #161616 !important;
+  color: #fff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+}
+
+/* Centrado debajo de los productos */
+.product-catalog .row.mt-4 {
+  display: block;
+  margin-top: 10px !important;
+}
+
 /* ---------- Footer ---------- */
 .footer {
   background-color: #181717;

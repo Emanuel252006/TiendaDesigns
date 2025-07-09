@@ -10,6 +10,8 @@ import tallasRouter from "./router/tallaRoutes.js";
 import productTallaRoutes from "./router/productTallaRoutes.js";
 import carruselRoutes from "./router/carruselRoutes.js";
 import contactRouter from "./router/contactRouter.js";
+import cartRoutes from "./router/cartRoutes.js";
+import checkoutRoutes from "./router/checkoutRoutes.js";
 
 import { fileURLToPath } from "url";
 import path from "path";
@@ -23,7 +25,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // 2. Middlewares
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
     credentials: true,
   })
 );
@@ -31,10 +33,13 @@ app.use(express.json());
 app.use(morgan("dev"));
 app.use(cookieParser());
 
-// 3. Carpeta de imágenes (Express.static)
+// 3. Carpetas estáticas
 const IMAGES_DIR = path.join(__dirname, "../images");
+const INVOICES_DIR = path.join(__dirname, "../invoices");
 console.log("Static images folder:", IMAGES_DIR);
+console.log("Static invoices folder:", INVOICES_DIR);
 app.use("/images", express.static(IMAGES_DIR));
+app.use("/invoices", express.static(INVOICES_DIR));
 
 // 4. Rutas de la API
 app.use("/api/tallas", tallasRouter);
@@ -42,8 +47,10 @@ app.use("/api/productTalla", productTallaRoutes);
 app.use("/api/carrusel", carruselRoutes);
 app.use("/api", contactRouter);
 app.use("/api", authRouter);
-app.use("/api", userRouter);
+app.use("/api/users", userRouter);
 app.use("/api/products", productRoutes);
+app.use("/api/cart", cartRoutes);
+app.use("/api/checkout", checkoutRoutes);
 
 // 5. Handler genérico de errores
 app.use((err, req, res, next) => {

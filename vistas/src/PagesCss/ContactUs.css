@@ -137,8 +137,12 @@ body {
   margin-top: 1rem;
 }
 .error-msg {
-  color: red;
-  margin-top: 1rem;
+  color: #d32f2f;
+  font-size: 0.95em;
+  margin-top: 2px;
+  margin-bottom: 0;
+  text-align: left;
+  font-weight: 500;
 }
 /* Esta regla anula el color gris de .contactanos-info p */
 .contactanos-info .success-msg {

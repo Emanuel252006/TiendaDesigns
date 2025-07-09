@@ -136,7 +136,7 @@
 /* Botón de añadir al carrito */
 .add-to-cart-button {
   padding: 12px 20px;
-  background-color: #3498DB;
+  background-color: #000 !important;
   color: white;
   border: none;
   border-radius: 4px;
@@ -146,5 +146,5 @@
 }
 
 .add-to-cart-button:hover {
-  background-color: #2980B9;
+  background-color: #161616 !important;
 }
