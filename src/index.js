@@ -1,6 +1,11 @@
 import app from "./app.js";
 import { connectBD } from "./db.js";
 
+// Inicializar servicios
+import './services/emailService.js';
+import './services/pdfService.js';
+
+
 // Conecta a la base de datos antes de arrancar el servidor
 connectBD()
   .then(() => {

@@ -60,6 +60,34 @@
   font-weight: 500;
 }
 
+/* Botón Agregar Producto */
+.btn-agregar-producto {
+  background: linear-gradient(135deg, #000000 0%, #333333 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-agregar-producto:hover {
+  background: linear-gradient(135deg, #333333 0%, #000000 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.btn-agregar-producto:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
 /* Grid de productos */
 .products-grid {
   display: grid;
@@ -125,8 +153,10 @@
   bottom: 0;
   background: rgba(0, 0, 0, 0.7);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 10px;
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -149,6 +179,18 @@
 .overlay-button:hover {
   background: #f8f9fa !important;
   transform: scale(1.05) !important;
+}
+
+.delete-button {
+  background-color: #dc3545 !important;
+  color: white !important;
+  border: none;
+  margin-top: 0;
+}
+
+.delete-button:hover {
+  background-color: #c82333 !important;
+  color: white !important;
 }
 
 /* Información del producto */

@@ -1,0 +1,132 @@
+.confirmation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.confirmation-modal {
+  background: white;
+  border-radius: 12px;
+  padding: 0;
+  min-width: 400px;
+  max-width: 500px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  animation: slideIn 0.3s ease-out;
+  overflow: hidden;
+}
+
+.confirmation-modal.warning {
+  border-top: 4px solid #ffc107;
+}
+
+.confirmation-modal.danger {
+  border-top: 4px solid #dc3545;
+}
+
+.confirmation-modal.info {
+  border-top: 4px solid #17a2b8;
+}
+
+.confirmation-header {
+  padding: 20px 24px 0 24px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.confirmation-header h4 {
+  margin: 0;
+  color: #333;
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.confirmation-body {
+  padding: 20px 24px;
+}
+
+.confirmation-body p {
+  margin: 0;
+  color: #666;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.confirmation-actions {
+  padding: 16px 24px 24px 24px;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  background-color: #f8f9fa;
+}
+
+.confirmation-btn-cancel {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.confirmation-btn-cancel:hover {
+  background-color: #5a6268;
+  border-color: #545b62;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.confirmation-btn-confirm {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.confirmation-btn-confirm:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 576px) {
+  .confirmation-modal {
+    min-width: 90%;
+    margin: 20px;
+  }
+  
+  .confirmation-actions {
+    flex-direction: column;
+  }
+  
+  .confirmation-actions button {
+    width: 100%;
+  }
+} 

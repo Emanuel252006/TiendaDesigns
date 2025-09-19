@@ -71,7 +71,7 @@ export const createPersona = async (personaData) => {
 
 export const loginRequest = async (user) => {
   try {
-    const res = await axios.post("/api/login", user);
+    const res = await axios.post("/auth/login", user);
     return res;
   } catch (error) {
     throw error;
@@ -80,7 +80,7 @@ export const loginRequest = async (user) => {
 
 export const registerRequest = async (user) => {
   try {
-    const res = await axios.post("/api/userregister", user);
+    const res = await axios.post("/users/userregister", user);
     return res;
   } catch (error) {
     throw error;
@@ -89,7 +89,7 @@ export const registerRequest = async (user) => {
 
 export const forgotPasswordRequest = async (correo) => {
   try {
-    const res = await axios.post("/forgot-password", { correo });
+    const res = await axios.post("/auth/forgot-password", { correo });
     return res.data;
   } catch (error) {
     throw error.response?.data || { message: 'Error solicitando código de recuperación.' };
@@ -98,7 +98,7 @@ export const forgotPasswordRequest = async (correo) => {
 
 export const resetPasswordRequest = async ({ correo, codigo, nuevaContrasena }) => {
   try {
-    const res = await axios.post("/reset-password", { correo, codigo, nuevaContrasena });
+    const res = await axios.post("/auth/reset-password", { correo, codigo, nuevaContrasena });
     return res.data;
   } catch (error) {
     throw error.response?.data || { message: 'Error restableciendo la contraseña.' };

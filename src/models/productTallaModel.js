@@ -1,12 +1,10 @@
 // src/models/productTallaModel.js
-import sql from 'mssql';
 import { getPool } from '../db.js';
 
 export const productTallaModel = {
   // Listar todas o filtrar por productoId
   async findAll(productoId) {
     const pool = await getPool();
-    const req = pool.request();
     let query = `
       SELECT pt.ProductoID,
              pt.TallaID,
@@ -15,85 +13,73 @@ export const productTallaModel = {
         FROM ProductoTallas pt
    LEFT JOIN Tallas t ON pt.TallaID = t.TallaID
     `;
+    let params = [];
     if (productoId) {
-      req.input('productoId', sql.Int, productoId);
-      query += ' WHERE pt.ProductoID = @productoId';
+      query += ' WHERE pt.ProductoID = ?';
+      params.push(productoId);
     }
-    const result = await req.query(query);
-    return result.recordset;
+    const [rows] = await pool.execute(query, params);
+    return rows;
   },
 
   // Obtener una única combinación
   async findOne(productoId, tallaId) {
     const pool = await getPool();
-    const result = await pool.request()
-      .input('productoId', sql.Int, productoId)
-      .input('tallaId',    sql.Int, tallaId)
-      .query(`
-        SELECT ProductoID, TallaID, Stock
-          FROM ProductoTallas
-         WHERE ProductoID = @productoId
-           AND TallaID    = @tallaId
-      `);
-    return result.recordset[0] || null;
+    const [rows] = await pool.execute(`
+      SELECT ProductoID, TallaID, Stock
+        FROM ProductoTallas
+       WHERE ProductoID = ?
+         AND TallaID    = ?
+    `, [productoId, tallaId]);
+    return rows[0] || null;
   },
 
   // Crear nueva relación producto–talla
   async create({ ProductoID, TallaID, Stock }) {
+    console.log('=== DEBUG: productTallaModel.create ===');
+    console.log('Datos recibidos:', { ProductoID, TallaID, Stock });
+    
     const pool = await getPool();
 
-    // 1) Insertar sin OUTPUT
-    await pool.request()
-      .input('ProductoID', sql.Int, ProductoID)
-      .input('TallaID',    sql.Int, TallaID)
-      .input('Stock',      sql.Int, Stock)
-      .query(`
-        INSERT INTO ProductoTallas (ProductoID, TallaID, Stock)
-        VALUES (@ProductoID, @TallaID, @Stock);
-      `);
+    // 1) Insertar
+    await pool.execute(`
+      INSERT INTO ProductoTallas (ProductoID, TallaID, Stock)
+      VALUES (?, ?, ?)
+    `, [ProductoID, TallaID, Stock]);
 
     // 2) Consultar el registro insertado
-    const result = await pool.request()
-      .input('ProductoID', sql.Int, ProductoID)
-      .input('TallaID',    sql.Int, TallaID)
-      .query(`
-        SELECT ProductoID, TallaID, Stock
-          FROM ProductoTallas
-         WHERE ProductoID = @ProductoID
-           AND TallaID    = @TallaID;
-      `);
+    const [rows] = await pool.execute(`
+      SELECT ProductoID, TallaID, Stock
+        FROM ProductoTallas
+       WHERE ProductoID = ?
+         AND TallaID    = ?
+    `, [ProductoID, TallaID]);
 
-    return result.recordset[0];
+    console.log('Registro insertado:', rows[0]);
+    return rows[0];
   },
 
   // Actualizar stock de la combinación
   async update(productoId, tallaId, Stock) {
     const pool = await getPool();
 
-    // 1) UPDATE sin OUTPUT
-    await pool.request()
-      .input('ProductoID', sql.Int, productoId)
-      .input('TallaID',    sql.Int, tallaId)
-      .input('Stock',      sql.Int, Stock)
-      .query(`
-        UPDATE ProductoTallas
-           SET Stock = @Stock
-         WHERE ProductoID = @ProductoID
-           AND TallaID    = @TallaID;
-      `);
+    // 1) UPDATE
+    await pool.execute(`
+      UPDATE ProductoTallas
+         SET Stock = ?
+       WHERE ProductoID = ?
+         AND TallaID    = ?
+    `, [Stock, productoId, tallaId]);
 
     // 2) Consultar el registro actualizado
-    const result = await pool.request()
-      .input('ProductoID', sql.Int, productoId)
-      .input('TallaID',    sql.Int, tallaId)
-      .query(`
-        SELECT ProductoID, TallaID, Stock
-          FROM ProductoTallas
-         WHERE ProductoID = @ProductoID
-           AND TallaID    = @TallaID;
-      `);
+    const [rows] = await pool.execute(`
+      SELECT ProductoID, TallaID, Stock
+        FROM ProductoTallas
+       WHERE ProductoID = ?
+         AND TallaID    = ?
+    `, [productoId, tallaId]);
 
-    return result.recordset[0] || null;
+    return rows[0] || null;
   },
 
   // Eliminar la relación
@@ -101,27 +87,21 @@ export const productTallaModel = {
     const pool = await getPool();
 
     // 1) Obtener antes de borrar
-    const { recordset } = await pool.request()
-      .input('ProductoID', sql.Int, productoId)
-      .input('TallaID',    sql.Int, tallaId)
-      .query(`
-        SELECT ProductoID, TallaID, Stock
-          FROM ProductoTallas
-         WHERE ProductoID = @ProductoID
-           AND TallaID    = @TallaID;
-      `);
-    const toDelete = recordset[0];
+    const [rows] = await pool.execute(`
+      SELECT ProductoID, TallaID, Stock
+        FROM ProductoTallas
+       WHERE ProductoID = ?
+         AND TallaID    = ?
+    `, [productoId, tallaId]);
+    const toDelete = rows[0];
     if (!toDelete) return null;
 
-    // 2) Borrar sin OUTPUT
-    await pool.request()
-      .input('ProductoID', sql.Int, productoId)
-      .input('TallaID',    sql.Int, tallaId)
-      .query(`
-        DELETE FROM ProductoTallas
-         WHERE ProductoID = @ProductoID
-           AND TallaID    = @TallaID;
-      `);
+    // 2) Borrar
+    await pool.execute(`
+      DELETE FROM ProductoTallas
+       WHERE ProductoID = ?
+         AND TallaID    = ?
+    `, [productoId, tallaId]);
 
     return toDelete;
   }

@@ -16,6 +16,7 @@ function Profile() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     address: "",
     country: "",
     city: "",
@@ -50,6 +51,7 @@ function Profile() {
       const initialData = {
         name: user.NombreUsuario || "",
         email: user.Correo || "",
+        phone: user.Telefono || "",
         address: user.Direccion || "",
         country: user.Pais || "",
         city: user.Ciudad || "",
@@ -96,6 +98,7 @@ function Profile() {
     const updatePayload = {};
     if (diff.name) updatePayload.NombreUsuario = diff.name;
     if (diff.email) updatePayload.Correo = diff.email;
+    if (diff.phone) updatePayload.Telefono = diff.phone;
     if (diff.address) updatePayload.Direccion = diff.address;
     if (diff.country) updatePayload.Pais = diff.country;
     if (diff.city) updatePayload.Ciudad = diff.city;
@@ -114,6 +117,9 @@ function Profile() {
         
         // Actualizamos el estado inicial para reflejar los cambios en el formulario
         setInitialFormData(formData);
+        
+        // Los datos ya se actualizaron automáticamente en el contexto
+        // No necesitamos recargar nada adicional
       }
       // Si no es success, los errores ya se manejan en el contexto
     } catch (error) {
@@ -166,8 +172,14 @@ function Profile() {
         });
 
         // Hacer logout y redirigir al login
+        console.log('🔄 Iniciando logout...');
         await logout();
-        navigate("/login");
+        console.log('✅ Logout completado, redirigiendo...');
+        
+        // Agregar un pequeño delay para asegurar que el contexto se actualice
+        setTimeout(() => {
+          navigate("/login");
+        }, 100);
       });
     } catch (error) {
       console.error("Error al cambiar la contraseña:", error);
@@ -224,6 +236,20 @@ function Profile() {
                   />
                   {errors.Correo && (
                     <div className="error-message">{errors.Correo}</div>
+                  )}
+                </div>
+                <div className="form-group">
+                  <label htmlFor="phone">Teléfono:</label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    placeholder="Ej: +57 300 123 4567"
+                    value={formData.phone}
+                    onChange={handleChange}
+                  />
+                  {errors.Telefono && (
+                    <div className="error-message">{errors.Telefono}</div>
                   )}
                 </div>
                 <div className="form-group">

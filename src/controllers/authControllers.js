@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import { createTokenAccesss } from '../libs/jwt.js';
 import jwt from 'jsonwebtoken';
 import { TOKEN_SECRET } from "../config.js";
-import { findUserByEmail, getUserById, updateUserById, insertUserWithAddress } from '../models/userModel.js'; // Asegúrate de importar getUserById para verifyToken
+import { findUserByEmail, getUserById, updateUserById, insertUserWithAddress, updateUserActivity, setUserInactive } from '../models/userModel.js'; // Asegúrate de importar getUserById para verifyToken
 import { changePasswordSchema } from '../schemas/authSchemas.js';
 import { sendVerificationCode } from '../services/emailService.js';
 import { registerSchema } from '../schemas/authSchemas.js';
@@ -49,6 +49,9 @@ export const login = async (req, res) => {
             return res.status(500).json({ message: "Error al generar el token." });
         }
 
+        // Actualizar última actividad del usuario
+        await updateUserActivity(userFound.UsuarioID);
+
         // Configuración de la cookie (importante para seguridad en producción)
         res.cookie('token', token, {
             httpOnly: process.env.NODE_ENV === 'production', // Solo accesible por el servidor en producción
@@ -69,19 +72,35 @@ export const login = async (req, res) => {
     }
 };
 
-export const logout = (req, res) => {
-    res.cookie('token', '', {
-        expires: new Date(0), // Expira la cookie inmediatamente
-        httpOnly: process.env.NODE_ENV === 'production',
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'Lax',
-    });
-    return res.sendStatus(200); // 200 OK: la operación fue exitosa
+export const logout = async (req, res) => {
+    console.log('🚨 PRUEBA - Controlador logout ejecutándose');
+    try {
+        console.log('🔍 Logout ejecutándose...');
+        console.log('👤 Usuario en req.user:', req.user);
+        
+        if (req.user && req.user.UsuarioID) {
+            console.log('✅ Marcando usuario inactivo:', req.user.UsuarioID);
+            const result = await setUserInactive(req.user.UsuarioID);
+            console.log('✅ Resultado setUserInactive:', result);
+        } else {
+            console.log('❌ No hay usuario en req.user o no tiene ID');
+        }
+    } catch (e) {
+        console.error('❌ Error marcando inactivo en logout:', e);
+    } finally {
+        res.cookie('token', '', {
+            expires: new Date(0), // Expira la cookie inmediatamente
+            httpOnly: process.env.NODE_ENV === 'production',
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'Lax',
+        });
+        return res.sendStatus(200);
+    }
 };
 
 export const profile = async (req, res) => {
     try {
-        const result = await getUserById(req.user.id);
+        const result = await getUserById(req.user.UsuarioID);
 
         if (result.length === 0) {
             return res.status(400).json({ message: "Usuario no encontrado." });
@@ -93,6 +112,7 @@ export const profile = async (req, res) => {
             UsuarioID: userFound.UsuarioID,
             NombreUsuario: userFound.NombreUsuario,
             Correo: userFound.Correo,
+            Telefono: userFound.Telefono,
             Rol: userFound.Rol,
             FechaRegistro: userFound.FechaRegistro,
             // Datos de dirección
@@ -133,6 +153,7 @@ export const verifyToken = async (req, res) => {
                 UsuarioID: userData.UsuarioID,
                 NombreUsuario: userData.NombreUsuario,
                 Correo: userData.Correo,
+                Telefono: userData.Telefono,
                 Rol: userData.Rol,
                 FechaRegistro: userData.FechaRegistro,
                 // Datos de dirección
@@ -149,14 +170,15 @@ export const verifyToken = async (req, res) => {
 };
 
 export const updateProfile = async (req, res) => {
-    const userId = req.user.id;
-    const { NombreUsuario, Correo, Direccion, Ciudad, Pais, CodigoPostal } = req.body;
+    const userId = req.user.UsuarioID;
+    const { NombreUsuario, Correo, Telefono, Direccion, Ciudad, Pais, CodigoPostal } = req.body;
 
     try {
         // Preparar los campos a actualizar
         const userFields = {};
         if (NombreUsuario !== undefined) userFields.NombreUsuario = NombreUsuario;
         if (Correo !== undefined) userFields.Correo = Correo;
+        if (Telefono !== undefined) userFields.Telefono = Telefono;
 
         const addressFields = {};
         if (Direccion !== undefined) addressFields.Direccion = Direccion;
@@ -190,7 +212,7 @@ export const updateProfile = async (req, res) => {
 
 export const changePassword = async (req, res) => {
     const { currentPassword, newPassword, confirmPassword } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.UsuarioID;
 
     // 1. Validar con Zod pero capturar los errores en vez de responder directamente
     let zodErrors = {};
@@ -273,7 +295,7 @@ export const startRegister = async (req, res) => {
     return res.status(400).json(errorObject);
   }
 
-  const { NombreUsuario, Contrasena, Correo, Rol, Direccion, Ciudad, Pais, CodigoPostal } = req.body;
+  const { NombreUsuario, Contrasena, Correo, Telefono, Rol, Direccion, Ciudad, Pais, CodigoPostal } = req.body;
 
   // Validar que el correo no esté ya registrado
   const existing = await findUserByEmail(Correo);
@@ -288,9 +310,14 @@ export const startRegister = async (req, res) => {
   // Guardar temporalmente los datos y el código
   pendingVerifications.set(Correo, {
     code,
-    userData: { NombreUsuario, Contrasena, Correo, Rol, Direccion, Ciudad, Pais, CodigoPostal },
+    userData: { NombreUsuario, Contrasena, Correo, Telefono, Rol, Direccion, Ciudad, Pais, CodigoPostal },
     expiresAt
   });
+
+  // Modo pruebas/desarrollo: permitir saltar envío de email y devolver el código
+  if (process.env.SKIP_EMAIL_VERIFICATION === 'true') {
+    return res.json({ success: true, message: 'Código generado (modo pruebas).', testCode: code });
+  }
 
   // Enviar el código por email
   try {

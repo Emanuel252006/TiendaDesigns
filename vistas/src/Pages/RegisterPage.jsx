@@ -148,6 +148,19 @@ function RegisterPages() {
                     )}
                   </Form.Group>
 
+                  {/* Teléfono */}
+                  <Form.Group controlId="telefono" className="form-group-custom">
+                    <Form.Label>Teléfono (Opcional)</Form.Label>
+                    <Form.Control
+                      type="tel"
+                      placeholder="Ej: +57 300 123 4567"
+                      {...register("Telefono")}
+                    />
+                    {errors.Telefono && (
+                      <div className="error-message">{Array.isArray(errors.Telefono) ? errors.Telefono[0] : errors.Telefono}</div>
+                    )}
+                  </Form.Group>
+
                   {/* Contraseña */}
                   <Form.Group controlId="password" className="form-group-custom">
                     <Form.Label>Contraseña</Form.Label>

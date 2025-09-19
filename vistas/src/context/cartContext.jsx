@@ -27,8 +27,10 @@ export const CartProvider = ({ children }) => {
   // Cargar carrito cuando el usuario se autentica
   useEffect(() => {
     if (isAuthenticated && user) {
+      console.log('🛒 CartContext: Usuario autenticado, cargando carrito para:', user.NombreUsuario);
       loadCart();
     } else {
+      console.log('🛒 CartContext: Usuario no autenticado, limpiando carrito');
       // Limpiar carrito si no está autenticado
       setCartItems([]);
       setCartSummary({
@@ -38,6 +40,49 @@ export const CartProvider = ({ children }) => {
         itemCount: 0
       });
     }
+  }, [isAuthenticated, user]);
+
+  // Escuchar eventos de navegación para recargar el carrito
+  useEffect(() => {
+    const handlePopState = () => {
+      console.log('🛒 CartContext: Navegación hacia atrás detectada, verificando carrito...');
+      if (isAuthenticated && user) {
+        // Pequeño delay para asegurar que el AuthContext se haya actualizado
+        setTimeout(() => {
+          console.log('🛒 CartContext: Recargando carrito tras navegación...');
+          loadCart();
+        }, 100);
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden && isAuthenticated && user) {
+        console.log('🛒 CartContext: Página visible, verificando carrito...');
+        setTimeout(() => {
+          loadCart();
+        }, 100);
+      }
+    };
+
+    const handleAuthStateRefreshed = (event) => {
+      console.log('🛒 CartContext: Estado de autenticación refrescado, recargando carrito...');
+      const { user: refreshedUser, isAuthenticated: refreshedAuth } = event.detail;
+      if (refreshedAuth && refreshedUser) {
+        setTimeout(() => {
+          loadCart();
+        }, 50);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('authStateRefreshed', handleAuthStateRefreshed);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('authStateRefreshed', handleAuthStateRefreshed);
+    };
   }, [isAuthenticated, user]);
 
   // Cargar carrito desde el servidor
@@ -64,7 +109,7 @@ export const CartProvider = ({ children }) => {
   // Agregar producto al carrito
   const addToCart = async (productData) => {
     if (!isAuthenticated) {
-      throw new Error("Debes iniciar sesión para agregar productos al carrito");
+      throw new Error("¡Inicia sesión para agregar productos a tu carrito!");
     }
 
     try {
@@ -86,8 +131,33 @@ export const CartProvider = ({ children }) => {
       }
     } catch (err) {
       console.error("Error al agregar al carrito:", err);
-      setError(err.message || "Error al agregar al carrito");
-      throw err;
+      
+      // Manejar errores específicos del backend
+      let errorMessage = "Error al agregar al carrito";
+      
+      if (err.response) {
+        // Error de respuesta del servidor (400, 500, etc.)
+        const { status, data } = err.response;
+        
+        if (status === 400) {
+          // Errores de validación o stock
+          if (data.message) {
+            errorMessage = data.message;
+          } else if (data.error) {
+            errorMessage = data.error;
+          }
+        } else if (status === 401) {
+          errorMessage = "Debes iniciar sesión para agregar productos al carrito";
+        } else if (status === 500) {
+          errorMessage = "Error interno del servidor. Inténtalo de nuevo más tarde.";
+        }
+      } else if (err.message) {
+        // Error de red u otro tipo
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
+      throw new Error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -95,14 +165,18 @@ export const CartProvider = ({ children }) => {
 
   // Actualizar cantidad de un ítem
   const updateCartItem = async (cartItemId, cantidad) => {
+    console.log('🔍 Debug - updateCartItem en contexto:', { cartItemId, cantidad });
     if (!isAuthenticated) return;
 
     try {
       setLoading(true);
       setError(null);
+      console.log('🔍 Debug - Llamando cartApi.updateCartItem...');
       const response = await cartApi.updateCartItem(cartItemId, cantidad);
+      console.log('🔍 Debug - Respuesta de cartApi:', response);
       
       if (response.success) {
+        console.log('🔍 Debug - Recargando carrito...');
         await loadCart();
         return { success: true, message: response.message };
       } else {
@@ -175,7 +249,7 @@ export const CartProvider = ({ children }) => {
   const checkStock = async (productoId, tallaId) => {
     try {
       const response = await cartApi.checkStock(productoId, tallaId);
-      return response.data.stock;
+      return response.data?.stock || 0;
     } catch (err) {
       console.error("Error al verificar stock:", err);
       return 0;
@@ -185,6 +259,14 @@ export const CartProvider = ({ children }) => {
   // Limpiar errores
   const clearError = () => {
     setError(null);
+  };
+
+  // Refrescar carrito manualmente
+  const refreshCart = async () => {
+    console.log('🛒 CartContext: Refrescando carrito manualmente...');
+    if (isAuthenticated && user) {
+      await loadCart();
+    }
   };
 
   // Formatear precio
@@ -214,6 +296,7 @@ export const CartProvider = ({ children }) => {
         clearCart,
         checkStock,
         loadCart,
+        refreshCart,
         clearError,
         formatPrice,
         getTotalPrice

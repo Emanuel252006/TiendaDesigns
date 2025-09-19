@@ -114,6 +114,38 @@
   cursor: not-allowed;
 }
 
+/* Contenedor de botones */
+.checkout-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* Botón de simulación */
+.btn-simulate {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 0.8rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-simulate:hover:not(:disabled) {
+  background: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+}
+
+.btn-simulate:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
 /* Mensaje informativo para usuarios registrados */
 .user-info-notice {
   margin-bottom: 1.5rem;
@@ -135,6 +167,24 @@
 .user-info-notice p::before {
   content: "✅";
   font-size: 1rem;
+}
+
+/* Aviso informativo de PayU */
+.payment-info-notice {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #fff3cd;
+  border-radius: 8px;
+  border: 1px solid #ffeaa7;
+}
+
+.payment-info-notice p {
+  color: #856404;
+  font-size: 0.9rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 /* Campos deshabilitados */
@@ -179,7 +229,7 @@
   border-bottom: none;
 }
 
-.item-image {
+.checkout-page .item-image {
   width: 60px;
   height: 60px;
   border-radius: 8px;
@@ -187,25 +237,25 @@
   flex-shrink: 0;
 }
 
-.item-image img {
+.checkout-page .item-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.item-details h4 {
+.checkout-page .item-details h4 {
   margin: 0 0 0.5rem 0;
   font-size: 1rem;
   color: #333;
 }
 
-.item-details p {
+.checkout-page .item-details p {
   margin: 0.25rem 0;
   font-size: 0.9rem;
   color: #666;
 }
 
-.item-price {
+.checkout-page .item-price {
   font-weight: 600;
   color: #667eea !important;
 }
@@ -231,6 +281,12 @@
   margin-top: 0.5rem;
 }
 
+.free-shipping {
+  color: #28a745 !important;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
 /* Carrito vacío */
 .checkout-empty {
   text-align: center;
@@ -252,7 +308,7 @@
   margin-bottom: 2rem;
 }
 
-.btn-primary {
+.checkout-page .btn-primary {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
@@ -264,7 +320,7 @@
   transition: transform 0.2s ease;
 }
 
-.btn-primary:hover {
+.checkout-page .btn-primary:hover {
   transform: translateY(-2px);
 }
 
@@ -289,5 +345,171 @@
   
   .checkout-content h1 {
     font-size: 2rem;
+  }
+}
+
+/* ========== ESTILOS PARA PAYU ========== */
+
+/* Sección de método de pago */
+.payment-method-section {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border: 2px solid #e9ecef;
+}
+
+.payment-method-section h3 {
+  color: #495057;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.payment-method-options {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.payment-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: white;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.payment-option:hover {
+  border-color: #007bff;
+  background: #f8f9ff;
+}
+
+.payment-option input[type="radio"] {
+  margin: 0;
+  accent-color: #007bff;
+}
+
+.payment-option input[type="radio"]:checked + span {
+  color: #007bff;
+  font-weight: 600;
+}
+
+.payment-option:has(input:checked) {
+  border-color: #007bff;
+  background: #e7f3ff;
+}
+
+/* Sección de tarjeta de crédito */
+.credit-card-section {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #dee2e6;
+}
+
+.credit-card-section h4 {
+  color: #495057;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.credit-card-section .form-group {
+  margin-bottom: 1rem;
+}
+
+.credit-card-section .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+}
+
+.credit-card-section input,
+.credit-card-section select {
+  padding: 0.75rem;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+  background: #f8f9fa;
+}
+
+.credit-card-section input:focus,
+.credit-card-section select:focus {
+  outline: none;
+  border-color: #007bff;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.credit-card-section small {
+  display: block;
+  color: #6c757d;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  font-style: italic;
+}
+
+/* Información de MercadoPago */
+.mercadopago-info {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.mercadopago-info p {
+  color: #856404;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Botón de redirección PayU */
+.btn-redirect {
+  background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  min-width: 200px;
+}
+
+.btn-redirect:hover {
+  background: linear-gradient(135deg, #5a32a3 0%, #d63384 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(111, 66, 193, 0.3);
+}
+
+.btn-redirect:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Responsive para PayU */
+@media (max-width: 768px) {
+  .payment-method-options {
+    flex-direction: column;
+  }
+  
+  .credit-card-section .form-row {
+    grid-template-columns: 1fr;
   }
 } 

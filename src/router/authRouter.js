@@ -9,7 +9,8 @@ const router = Router();
 router.post('/login', validateSchema(loginSchema), login); 
 
 
-router.post('/logout', logout); 
+// Proteger logout para tener req.user y poder marcar inactivo
+router.post('/logout', requiredAuth, logout); 
 
 
 router.get('/profile', requiredAuth, profile);

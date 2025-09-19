@@ -1,0 +1,173 @@
+/* Estilos para la página de Mis Pedidos */
+
+.orders-list {
+  max-width: 100%;
+}
+
+.order-card .card {
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.order-card .card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.order-card .card-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px 12px 0 0 !important;
+  border: none;
+}
+
+.order-card .card-header h5 {
+  color: white;
+}
+
+.order-card .card-header small {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Badges de estado */
+.badge {
+  font-size: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 20px;
+}
+
+.badge-success {
+  background-color: #28a745;
+  color: white;
+}
+
+.badge-warning {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.badge-info {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.badge-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+/* Miniaturas de productos */
+.product-thumb {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+.product-thumb-placeholder {
+  width: 60px;
+  height: 60px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6c757d;
+  font-size: 1.5rem;
+}
+
+/* Información de productos */
+.order-card .card-body h6 {
+  color: #495057;
+  font-weight: 600;
+}
+
+.order-card .card-body .text-muted {
+  color: #6c757d !important;
+}
+
+/* Estado vacío */
+.text-center.py-5 {
+  padding: 3rem 0;
+}
+
+.text-center.py-5 .display-1 {
+  font-size: 4rem;
+  opacity: 0.5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .order-card .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .order-card .card-header .d-flex {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .product-thumb,
+  .product-thumb-placeholder {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .order-card .card-body .row {
+    margin: 0;
+  }
+  
+  .order-card .card-body .col-md-6,
+  .order-card .card-body .col-md-4 {
+    padding: 0.5rem;
+  }
+}
+
+/* Animaciones */
+.order-card {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Estilos para el spinner de carga */
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+  color: #667eea;
+}
+
+/* Botones */
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 25px;
+  padding: 0.75rem 2rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.btn-outline-danger {
+  border-radius: 25px;
+  padding: 0.5rem 1.5rem;
+  font-weight: 500;
+}

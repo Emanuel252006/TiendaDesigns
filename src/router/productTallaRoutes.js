@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   listProductTalla,
+  getProductTallas,
   getProductTalla,
   createProductTalla,
   updateProductTalla,
@@ -11,6 +12,9 @@ const router = Router();
 
 // listar (opcional: ?productoId=)
 router.get('/', listProductTalla);
+
+// obtener todas las tallas de un producto específico
+router.get('/product/:productoId', getProductTallas);
 
 // obtener stock de una única combinación
 router.get('/:productoId/:tallaId', getProductTalla);

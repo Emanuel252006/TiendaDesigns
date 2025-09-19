@@ -70,3 +70,43 @@ export const deleteProductRequest = async (id) => {
     throw error;
   }
 };
+
+// 📊 Dashboard APIs
+export const getStockPorTallasRequest = async () => {
+  try {
+    const response = await axios.get('/products/dashboard/stock-tallas', {
+      headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
+      params: { _t: Date.now() }
+    });
+    return response;
+  } catch (error) {
+    console.error('Error obteniendo stock por tallas:', error);
+    throw error;
+  }
+};
+
+export const getProductosVendidosRequest = async () => {
+  try {
+    const response = await axios.get('/products/dashboard/ventas', {
+      headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
+      params: { _t: Date.now() }
+    });
+    return response;
+  } catch (error) {
+    console.error('Error obteniendo productos vendidos:', error);
+    throw error;
+  }
+};
+
+export const getEstadisticasProductosRequest = async () => {
+  try {
+    const response = await axios.get('/products/dashboard/estadisticas', {
+      headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
+      params: { _t: Date.now() }
+    });
+    return response;
+  } catch (error) {
+    console.error('Error obteniendo estadísticas de productos:', error);
+    throw error;
+  }
+};

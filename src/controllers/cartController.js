@@ -4,7 +4,7 @@ export const CartController = {
   // Obtener el carrito del usuario autenticado
   async getCart(req, res) {
     try {
-      const userId = req.user.id;
+      const userId = req.user.UsuarioID;
       const cartItems = await CartModel.getCartByUserId(userId);
       
       // Filtrar solo los ítems que tienen ProductoID (no son null)
@@ -15,8 +15,8 @@ export const CartController = {
         return total + (item.Precio * item.Cantidad);
       }, 0);
       
-      const shipping = subtotal > 0 ? 20000 : 0; // Envío fijo de $20,000
-      const total = subtotal + shipping;
+      const shipping = 0; // Envío gratis
+      const total = subtotal + shipping; // Total incluye envío
 
       res.json({
         success: true,
@@ -42,7 +42,7 @@ export const CartController = {
   // Agregar producto al carrito
   async addToCart(req, res) {
     try {
-      const userId = req.user.id;
+      const userId = req.user.UsuarioID;
       const { ProductoID, TallaID, Cantidad } = req.body;
 
       if (!userId) {
@@ -61,7 +61,9 @@ export const CartController = {
       const stockDisponible = await CartModel.checkStock(ProductoID, TallaID);
       
       if (stockDisponible <= 0) {
-        return res.status(400).json({ message: "No hay stock disponible para este producto" });
+        return res.status(400).json({ 
+          message: "No hay stock disponible para este producto en la talla seleccionada" 
+        });
       }
 
       // Verificar cantidad en carrito + nueva cantidad no exceda stock
@@ -69,7 +71,16 @@ export const CartController = {
       const cantidadTotal = cantidadEnCarrito + Cantidad;
       
       if (cantidadTotal > stockDisponible) {
-        return res.status(400).json({ message: "Stock insuficiente" });
+        const disponibleParaAgregar = stockDisponible - cantidadEnCarrito;
+        if (disponibleParaAgregar <= 0) {
+          return res.status(400).json({ 
+            message: `Ya tienes ${cantidadEnCarrito} unidades de este producto en tu carrito. No puedes agregar más porque el stock disponible es ${stockDisponible}.` 
+          });
+        } else {
+          return res.status(400).json({ 
+            message: `Solo puedes agregar ${disponibleParaAgregar} unidades más. Ya tienes ${cantidadEnCarrito} en tu carrito y el stock disponible es ${stockDisponible}.` 
+          });
+        }
       }
 
       // Agregar al carrito
@@ -84,8 +95,8 @@ export const CartController = {
       const cartItems = await CartModel.getCartByUserId(userId);
       const validCartItems = cartItems.filter(item => item.ProductoID !== null);
       const subtotal = validCartItems.reduce((total, item) => total + (item.Precio * item.Cantidad), 0);
-      const shipping = subtotal > 0 ? 20000 : 0;
-      const total = subtotal + shipping;
+      const shipping = 0; // Envío gratis
+      const total = subtotal + shipping; // Total incluye envío
 
       res.status(200).json({
         message: "Producto agregado al carrito",
@@ -109,7 +120,7 @@ export const CartController = {
   // Actualizar cantidad de un ítem en el carrito
   async updateCartItem(req, res) {
     try {
-      const userId = req.user.id;
+      const userId = req.user.UsuarioID;
       const { cartItemId } = req.params;
       const { cantidad } = req.body;
 
@@ -132,7 +143,7 @@ export const CartController = {
       }
 
       // Verificar stock disponible
-      const stockDisponible = await CartModel.checkStock(cartItem.ProductoID);
+      const stockDisponible = await CartModel.checkStock(cartItem.ProductoID, cartItem.TallaID);
       if (cantidad > stockDisponible) {
         return res.status(400).json({
           success: false,
@@ -161,7 +172,7 @@ export const CartController = {
   // Eliminar ítem del carrito
   async removeFromCart(req, res) {
     try {
-      const userId = req.user.id;
+      const userId = req.user.UsuarioID;
       const { cartItemId } = req.params;
 
       // Verificar que el ítem pertenece al usuario
@@ -195,7 +206,7 @@ export const CartController = {
   // Vaciar carrito completo
   async clearCart(req, res) {
     try {
-      const userId = req.user.id;
+      const userId = req.user.UsuarioID;
       
       await CartModel.clearCart(userId);
 

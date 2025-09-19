@@ -30,7 +30,7 @@ export const getProductTallaRequest = async (productoId, tallaId) => {
 export const createProductTallaRequest = async payload => {
   try {
     const { data } = await axios.post('/productTalla', payload);
-    alertSuccess('Stock por talla creado correctamente');
+    // No mostrar alerta aquí para evitar mensajes múltiples durante la creación de productos
     return data;
   } catch (err) {
     alertError('Error al crear stock por talla');

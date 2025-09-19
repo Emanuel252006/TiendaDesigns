@@ -2,7 +2,7 @@
 import { z, ZodIssueCode } from "zod";
 
 // No acepta tildes, espacios ni ciertos caracteres
-const noAccents     = /[àáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞŸ]/;
+const noAccents     = /[àáâãäåæçèéêëìíîïðòóôõöøùúûüýþÿÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÒÓÔÕÖØÙÚÛÜÝÞŸ]/; // sin ñ
 const noSpaces      = /\s/;
 const forbiddenChars = /[<>&"'/]/;
 // Regex más rígida para email
@@ -16,6 +16,7 @@ const hasUpper   = /[A-Z]/;
 const hasLower   = /[a-z]/;
 const hasDigit   = /\d/;
 const hasSpecial = /[-_@#*]/;
+const hasEnye       = /[ñÑ]/;
 
 export const registerSchema = z.object({
   NombreUsuario: z.string().superRefine((val, ctx) => {
@@ -33,10 +34,10 @@ export const registerSchema = z.object({
       });
       return;
     }
-    if (noSpaces.test(val)) {
+    if (/^\s|\s$/.test(val)) {
       ctx.addIssue({
         code: ZodIssueCode.custom,
-        message: "El nombre de usuario no puede contener espacios",
+        message: "El nombre de usuario no puede iniciar ni terminar con espacios",
       });
       return;
     }
@@ -51,7 +52,11 @@ export const registerSchema = z.object({
     }
   }),
 
- Correo: z.string().superRefine((val, ctx) => {
+   Correo: z.string().superRefine((val, ctx) => {
+    if (hasEnye.test(val)) {
+      ctx.addIssue({ code: ZodIssueCode.custom, message: "El correo no puede contener la letra ñ" });
+      return;
+    }
     if (noAccents.test(val)) {
       ctx.addIssue({ code: ZodIssueCode.custom, message: "El correo no puede contener tildes" });
       return;
@@ -69,12 +74,34 @@ export const registerSchema = z.object({
     }
   }),
 
+  Telefono: z.string().optional().superRefine((val, ctx) => {
+    if (val && val.trim() !== "") {
+      // Validar formato de teléfono colombiano
+      const phoneRegex = /^(\+57|57)?[1-9][0-9]{9}$/;
+      const cleanPhone = val.replace(/\s|-|\(|\)/g, ''); // Remover espacios, guiones y paréntesis
+      
+      if (!phoneRegex.test(cleanPhone)) {
+        ctx.addIssue({ 
+          code: ZodIssueCode.custom, 
+          message: "Formato de teléfono inválido. Use formato colombiano: +57 300 123 4567 o 300 123 4567" 
+        });
+      }
+    }
+  }),
+
 
   Contrasena: z.string().superRefine((val, ctx) => {
     if (forbiddenChars.test(val)) {
       ctx.addIssue({
         code: ZodIssueCode.custom,
         message: "La contraseña no puede contener <, >, &, \", ' o /",
+      });
+      return;
+    }
+    if (hasEnye.test(val)) {
+      ctx.addIssue({
+        code: ZodIssueCode.custom,
+        message: "La contraseña no puede contener la letra ñ",
       });
       return;
     }
@@ -179,6 +206,13 @@ export const registerSchema = z.object({
       });
       return;
     }
+    if (hasEnye.test(val)) {
+      ctx.addIssue({
+        code: ZodIssueCode.custom,
+        message: "La ciudad no puede contener la letra ñ",
+      });
+      return;
+    }
     if (noAccents.test(val)) {
       ctx.addIssue({
         code: ZodIssueCode.custom,
@@ -209,6 +243,13 @@ export const registerSchema = z.object({
       ctx.addIssue({
         code: ZodIssueCode.custom,
         message: "El país no puede contener <, >, &, \", ' o /",
+      });
+      return;
+    }
+    if (hasEnye.test(val)) {
+      ctx.addIssue({
+        code: ZodIssueCode.custom,
+        message: "El país no puede contener la letra ñ",
       });
       return;
     }
@@ -336,10 +377,10 @@ export const profileUpdateSchema = z.object({
       });
       return;
     }
-    if (noSpaces.test(val)) {
+    if (/^\s|\s$/.test(val)) {
       ctx.addIssue({
         code: ZodIssueCode.custom,
-        message: "El nombre de usuario no puede contener espacios",
+        message: "El nombre de usuario no puede iniciar ni terminar con espacios",
       });
       return;
     }
@@ -356,12 +397,20 @@ export const profileUpdateSchema = z.object({
 
   Correo: z.string().optional().superRefine((val, ctx) => {
     if (val === undefined || val === null) return; // Campo opcional, no validar si no está presente
+    if (hasEnye.test(val)) {
+      ctx.addIssue({ code: ZodIssueCode.custom, message: "El correo no puede contener la letra ñ" });
+      return;
+    }
     if (noAccents.test(val)) {
       ctx.addIssue({ code: ZodIssueCode.custom, message: "El correo no puede contener tildes" });
       return;
     }
     if (noSpaces.test(val)) {
       ctx.addIssue({ code: ZodIssueCode.custom, message: "El correo no puede contener espacios" });
+      return;
+    }
+    if (/^\s|\s$/.test(val)) {
+      ctx.addIssue({ code: ZodIssueCode.custom, message: "El correo no puede iniciar ni terminar con espacios" });
       return;
     }
     if (val.trim() === "") {
@@ -389,10 +438,10 @@ export const profileUpdateSchema = z.object({
       });
       return;
     }
-    if (noSpaces.test(val)) {
+    if (/^\s|\s$/.test(val)) {
       ctx.addIssue({
         code: ZodIssueCode.custom,
-        message: "La dirección no puede contener espacios",
+        message: "La dirección no puede iniciar ni terminar con espacios",
       });
       return;
     }
@@ -416,6 +465,13 @@ export const profileUpdateSchema = z.object({
       });
       return;
     }
+    if (hasEnye.test(val)) {
+      ctx.addIssue({
+        code: ZodIssueCode.custom,
+        message: "La ciudad no puede contener la letra ñ",
+      });
+      return;
+    }
     if (noAccents.test(val)) {
       ctx.addIssue({
         code: ZodIssueCode.custom,
@@ -427,6 +483,13 @@ export const profileUpdateSchema = z.object({
       ctx.addIssue({
         code: ZodIssueCode.custom,
         message: "La ciudad no puede contener espacios",
+      });
+      return;
+    }
+    if (/^\s|\s$/.test(val)) {
+      ctx.addIssue({
+        code: ZodIssueCode.custom,
+        message: "La ciudad no puede iniciar ni terminar con espacios",
       });
       return;
     }
@@ -450,6 +513,13 @@ export const profileUpdateSchema = z.object({
       });
       return;
     }
+    if (hasEnye.test(val)) {
+      ctx.addIssue({
+        code: ZodIssueCode.custom,
+        message: "El país no puede contener la letra ñ",
+      });
+      return;
+    }
     if (noAccents.test(val)) {
       ctx.addIssue({
         code: ZodIssueCode.custom,
@@ -461,6 +531,13 @@ export const profileUpdateSchema = z.object({
       ctx.addIssue({
         code: ZodIssueCode.custom,
         message: "El país no puede contener espacios",
+      });
+      return;
+    }
+    if (/^\s|\s$/.test(val)) {
+      ctx.addIssue({
+        code: ZodIssueCode.custom,
+        message: "El país no puede iniciar ni terminar con espacios",
       });
       return;
     }
@@ -495,6 +572,13 @@ export const profileUpdateSchema = z.object({
       ctx.addIssue({
         code: ZodIssueCode.custom,
         message: "El código postal no puede contener espacios",
+      });
+      return;
+    }
+    if (/^\s|\s$/.test(val)) {
+      ctx.addIssue({
+        code: ZodIssueCode.custom,
+        message: "El código postal no puede iniciar ni terminar con espacios",
       });
       return;
     }
@@ -645,6 +729,10 @@ export const changePasswordSchema = z.object({
 
 export const resetPasswordSchema = z.object({
   correo: z.string().superRefine((val, ctx) => {
+    if (hasEnye.test(val)) {
+      ctx.addIssue({ code: ZodIssueCode.custom, message: "El correo no puede contener la letra ñ" });
+      return;
+    }
     if (noAccents.test(val)) {
       ctx.addIssue({ code: ZodIssueCode.custom, message: "El correo no puede contener tildes" });
       return;
@@ -674,6 +762,13 @@ export const resetPasswordSchema = z.object({
       ctx.addIssue({
         code: ZodIssueCode.custom,
         message: 'La contraseña no puede contener <, >, &, ", \' o /',
+      });
+      return;
+    }
+    if (hasEnye.test(val)) {
+      ctx.addIssue({
+        code: ZodIssueCode.custom,
+        message: "La contraseña no puede contener la letra ñ",
       });
       return;
     }

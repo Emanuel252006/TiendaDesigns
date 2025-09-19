@@ -6,10 +6,14 @@ import {
     updateUser,
     deleteUser,
     login,
-    logao,
     verifyToken,
     profile,
-    getUserForCheckout
+    getUserForCheckout,
+    getUserStatistics,
+    getActiveCartUsers,
+    getCountryDistribution,
+    cleanDuplicateAddresses,
+    globalHeartbeat
 } from "../controllers/userController.js";
 
 import { requiredAuth } from "../middlewares/Token_validator.js";
@@ -27,7 +31,7 @@ router.post("/userregister", validateSchema(registerSchema), createUser);
 router.post('/login', validateSchema(loginSchema), login);
 
 
-router.post('/logao', logao);
+
 
 
 router.get('/verify', verifyToken);
@@ -48,5 +52,15 @@ router.get('/profile', requiredAuth, profile);
 
 router.get('/checkout-data', requiredAuth, getUserForCheckout);
 
+// Rutas para estadísticas de usuarios
+router.get('/statistics', requiredAuth, getUserStatistics);
+router.get('/active-carts', requiredAuth, getActiveCartUsers);
+router.get('/country-distribution', requiredAuth, getCountryDistribution);
+
+// Ruta temporal para limpiar direcciones duplicadas (solo admin)
+router.post('/clean-duplicates', requiredAuth, cleanDuplicateAddresses);
+
+// Ruta para heartbeat global (marcar todos los usuarios logueados como activos)
+router.post('/heartbeat', requiredAuth, globalHeartbeat);
 
 export default router;

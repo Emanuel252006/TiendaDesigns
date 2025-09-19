@@ -103,12 +103,12 @@ export const PDFService = {
         yPosition += 20;
 
         // Totales
-        const shipping = 20000; // Envío fijo
-        const total = subtotal + shipping;
+            const shipping = 0; // Envío gratis
+    const total = subtotal + shipping; // Total igual al subtotal
 
         doc.fontSize(12)
            .text(`Subtotal: $${subtotal.toLocaleString()}`, 400, yPosition)
-           .text(`Envío: $${shipping.toLocaleString()}`, 400, yPosition + 20)
+           .text(`Envío: GRATIS`, 400, yPosition + 20)
            .fontSize(14)
            .text(`TOTAL: $${total.toLocaleString()}`, 400, yPosition + 40);
 

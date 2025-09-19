@@ -4,7 +4,10 @@ import { requiredAuth } from '../middlewares/Token_validator.js';
 
 const router = express.Router();
 
-// Todas las rutas del carrito requieren autenticación
+// Ruta pública para verificar stock (no requiere autenticación)
+router.get('/stock/:ProductoID/:TallaID', CartController.checkStock);
+
+// Todas las demás rutas del carrito requieren autenticación
 router.use(requiredAuth);
 
 // Obtener carrito del usuario
@@ -21,8 +24,5 @@ router.delete('/item/:cartItemId', CartController.removeFromCart);
 
 // Vaciar carrito completo
 router.delete('/clear', CartController.clearCart);
-
-// Verificar stock de un producto
-router.get('/stock/:ProductoID/:TallaID', CartController.checkStock);
 
 export default router; 

@@ -191,26 +191,18 @@ export const login = async (req, res) => {
 };
 
 
-export const logao = (req, res) => {
-    res.cookie('token', '', {
-        expires: new Date(0),
-        httpOnly: true, 
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'Lax'
-    });
-    return res.sendStatus(200);
-};
+
 
 
 export const profile = async (req, res) => {
     try {
         
-        if (!req.user || !req.user.id) {
+        if (!req.user || !req.user.UsuarioID) {
             return res.status(401).json({ message: "No autenticado. ID de usuario no disponible." });
         }
 
        
-        const result = await getUserByIdModel(req.user.id); 
+        const result = await getUserByIdModel(req.user.UsuarioID); 
 
         if (result.length === 0) {
             return res.status(404).json({ message: "Usuario no encontrado" });
@@ -285,7 +277,7 @@ export const verifyToken = async (req, res) => {
 // Obtener datos básicos del usuario para checkout
 export const getUserForCheckout = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.UsuarioID;
     
     const checkoutData = await getUserByIdModel(userId);
     
@@ -296,12 +288,16 @@ export const getUserForCheckout = async (req, res) => {
     const user = checkoutData[0];
     
     res.status(200).json({
-      nombre: user.NombreUsuario,
-      email: user.Correo,
-      direccion: user.Direccion,
-      ciudad: user.Ciudad,
-      pais: user.Pais,
-      codigoPostal: user.CodigoPostal
+      success: true,
+      data: {
+        nombre: user.NombreUsuario,
+        email: user.Correo,
+        telefono: user.Telefono,
+        direccion: user.Direccion,
+        ciudad: user.Ciudad,
+        pais: user.Pais,
+        codigoPostal: user.CodigoPostal
+      }
     });
   } catch (error) {
     console.error("Error en getUserForCheckout:", error);
@@ -315,26 +311,154 @@ export const getUserForCheckout = async (req, res) => {
  */
 export const changePassword = async (req, res) => {
     try {
-        if (!req.user || !req.user.id) {
-            return res.status(401).json({ message: "No autenticado. ID de usuario no disponible." });
-        }
+        const { id } = req.params;
         const { currentPassword, newPassword } = req.body;
-        if (!currentPassword || !newPassword) {
-            return res.status(400).json({ message: "Se requieren la contraseña actual y la nueva contraseña." });
-        }
-        const result = await getUserByIdModel(req.user.id);
-        if (result.length === 0) {
+
+        // Obtener el usuario actual
+        const currentUser = await getUserByIdModel(id);
+        if (currentUser.length === 0) {
             return res.status(404).json({ message: "Usuario no encontrado" });
         }
-        const userFound = result[0];
-        const isMatch = await bcrypt.compare(currentPassword, userFound.Contrasena);
-        if (!isMatch) {
-            return res.status(400).json({ message: "La contraseña actual es incorrecta." });
+
+        // Verificar la contraseña actual
+        const isPasswordValid = await bcrypt.compare(currentPassword, currentUser[0].Contrasena);
+        if (!isPasswordValid) {
+            return res.status(400).json({ message: "La contraseña actual es incorrecta" });
         }
-        const hash = await bcrypt.hash(newPassword, 10);
-        await updateUserById(req.user.id, { Contrasena: hash }, {}, undefined);
-        res.status(200).json({ message: "Contraseña actualizada exitosamente." });
+
+        // Hashear la nueva contraseña
+        const newPasswordHash = await bcrypt.hash(newPassword, 10);
+
+        // Actualizar la contraseña
+        const result = await updateUserById(id, { Contrasena: newPasswordHash }, {}, newPassword);
+        
+        if (result.rowsAffected[0] > 0) {
+            res.status(200).json({ message: "Contraseña actualizada exitosamente" });
+        } else {
+            res.status(500).json({ message: "No se pudo actualizar la contraseña" });
+        }
     } catch (error) {
-        res.status(500).json({ message: "Error al cambiar la contraseña", error: error.message });
+        console.error("Error en changePassword:", error);
+        res.status(500).json({ message: "Error interno del servidor", error: error.message });
+    }
+};
+
+// Controlador para obtener estadísticas generales de usuarios
+export const getUserStatistics = async (req, res) => {
+    try {
+        const { getActiveUsers, getUsersWithActiveCarts, getUsersByCountry, getUserStats } = await import('../models/userModel.js');
+        
+        const [activeUsers, usersWithCarts, usersByCountry, generalStats] = await Promise.all([
+            getActiveUsers(),
+            getUsersWithActiveCarts(),
+            getUsersByCountry(),
+            getUserStats()
+        ]);
+
+        res.status(200).json({
+            success: true,
+            data: {
+                activeUsers,
+                usersWithCarts,
+                usersByCountry,
+                generalStats
+            }
+        });
+    } catch (error) {
+        console.error("Error en getUserStatistics:", error);
+        res.status(500).json({ 
+            success: false,
+            message: "Error al obtener estadísticas de usuarios", 
+            error: error.message 
+        });
+    }
+};
+
+// Controlador para obtener solo usuarios con carritos activos
+export const getActiveCartUsers = async (req, res) => {
+    try {
+        const { getUsersWithActiveCarts } = await import('../models/userModel.js');
+        const usersWithCarts = await getUsersWithActiveCarts();
+        
+        res.status(200).json({
+            success: true,
+            data: usersWithCarts
+        });
+    } catch (error) {
+        console.error("Error en getActiveCartUsers:", error);
+        res.status(500).json({ 
+            success: false,
+            message: "Error al obtener usuarios con carritos activos", 
+            error: error.message 
+        });
+    }
+};
+
+// Controlador para obtener solo distribución por países
+export const getCountryDistribution = async (req, res) => {
+    try {
+        const { getUsersByCountry } = await import('../models/userModel.js');
+        const usersByCountry = await getUsersByCountry();
+        
+        res.status(200).json({
+            success: true,
+            data: usersByCountry
+        });
+    } catch (error) {
+        console.error("Error en getCountryDistribution:", error);
+        res.status(500).json({ 
+            success: false,
+            message: "Error al obtener distribución por países", 
+            error: error.message 
+        });
+    }
+};
+
+// Controlador temporal para limpiar direcciones duplicadas (solo para admin)
+export const cleanDuplicateAddresses = async (req, res) => {
+    try {
+        // Verificar que el usuario sea admin
+        if (req.user.Rol !== 'Admin') {
+            return res.status(403).json({
+                success: false,
+                message: "No tienes permisos para realizar esta acción"
+            });
+        }
+
+        const { cleanDuplicateAddresses } = await import('../models/userModel.js');
+        await cleanDuplicateAddresses();
+        
+        res.status(200).json({
+            success: true,
+            message: "Direcciones duplicadas limpiadas exitosamente"
+        });
+    } catch (error) {
+        console.error("Error en cleanDuplicateAddresses:", error);
+        res.status(500).json({ 
+            success: false,
+            message: "Error al limpiar direcciones duplicadas", 
+            error: error.message 
+        });
+    }
+};
+
+// Controlador para heartbeat global (marcar todos los usuarios logueados como activos)
+export const globalHeartbeat = async (req, res) => {
+    try {
+        const { markAllLoggedUsersAsActive } = await import('../models/userModel.js');
+        const result = await markAllLoggedUsersAsActive();
+        
+        res.status(200).json({
+            success: true,
+            message: "Heartbeat global ejecutado",
+            usersUpdated: result
+        });
+    } catch (error) {
+        console.error("Error en globalHeartbeat:", error);
+        res.status(500).json({ 
+            success: false,
+            message: "Error al ejecutar heartbeat global", 
+            error: error.message 
+        });
     }
 };
