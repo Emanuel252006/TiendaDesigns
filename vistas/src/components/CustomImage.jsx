@@ -1,14 +1,14 @@
 // src/components/CustomImage.jsx
 import React, { useState } from "react";
+import { IMAGES_BASE_URL } from "../config/runtime.js";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
-const DEFAULT_SRC = `${API_BASE}/images/default.png`;
+const DEFAULT_SRC = `${IMAGES_BASE_URL}/default.png`;
 
 export default function CustomImage({ folder, filename: raw, alt, className }) {
   // saca sólo la parte final del path
   const clean = raw ? raw.replace(/^\/+/, "").split("/").pop() : null;
   const initial = clean
-    ? `${API_BASE}/images/${folder}/${clean}`
+    ? `${IMAGES_BASE_URL}/${folder}/${clean}`
     : DEFAULT_SRC;
 
   const [src, setSrc] = useState(initial);

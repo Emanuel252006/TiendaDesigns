@@ -7,6 +7,7 @@ import "../PagesCss/Cart.css";
 import Footer from "../components/Footer";
 import Snackbar from "../components/Snackbar.jsx";
 import ConfirmationModal from "../components/ConfirmationModal.jsx";
+import { IMAGES_BASE_URL } from "../config/runtime.js";
 
 const CartPage = () => {
   const {
@@ -346,10 +347,10 @@ const CartPage = () => {
                 <div key={item.CarritoArticuloID || `cart-item-${index}`} className="cart-item">
                   <div className="item-image">
                     <img 
-                      src={`http://localhost:3001/images/${item.Imagen || 'default.png'}`}
+                      src={`${IMAGES_BASE_URL}/${item.Imagen || 'default.png'}`}
                       alt={item.NombreProducto}
                       onError={(e) => {
-                        e.target.src = "http://localhost:3001/images/default.png";
+                        e.target.src = `${IMAGES_BASE_URL}/default.png`;
                       }}
                     />
                   </div>

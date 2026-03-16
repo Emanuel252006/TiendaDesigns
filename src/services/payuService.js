@@ -3,11 +3,11 @@ import crypto from 'crypto';
 
 // Credenciales PayU Sandbox para Colombia (actualizadas)
 const PAYU_CONFIG = {
-  API_LOGIN: 'pRRXKOl8ikMmt9u',
-  API_KEY: '4Vj8eK4rloUd272L48hsrarnUA',
-  MERCHANT_ID: '508029',
-  ACCOUNT_ID: '512321',
-  API_URL: 'https://sandbox.api.payulatam.com/payments-api/4.0/service.cgi',
+  API_LOGIN: process.env.PAYU_API_LOGIN || 'pRRXKOl8ikMmt9u',
+  API_KEY: process.env.PAYU_API_KEY || '4Vj8eK4rloUd272L48hsrarnUA',
+  MERCHANT_ID: process.env.PAYU_MERCHANT_ID || '508029',
+  ACCOUNT_ID: process.env.PAYU_ACCOUNT_ID || '512321',
+  API_URL: process.env.PAYU_API_URL || 'https://sandbox.api.payulatam.com/payments-api/4.0/service.cgi',
   TEST_CARD: {
     number: '4097440000000004', // Tarjeta oficial PayU para aprobaciones
     name: 'APPROVED',
@@ -227,6 +227,8 @@ export const getPayUTransactionStatus = async (transactionId) => {
 export const generatePayURedirectUrl = (paymentData) => {
   const { referenceCode, amount, currency = 'COP', buyerEmail, buyerName } = paymentData;
   const signature = generatePayUSignature(referenceCode, amount, currency);
+  const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/+$/, '');
+  const backendUrl = (process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 3001}`).replace(/\/+$/, '');
   
   const params = new URLSearchParams({
     merchantId: PAYU_CONFIG.MERCHANT_ID,
@@ -241,8 +243,8 @@ export const generatePayURedirectUrl = (paymentData) => {
     test: '1',
     buyerEmail: buyerEmail,
     buyerFullName: buyerName,
-    responseUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/success`,
-    confirmationUrl: `http://localhost:3001/api/payu/notification`
+    responseUrl: `${frontendUrl}/checkout/success`,
+    confirmationUrl: `${backendUrl}/api/payu/notification`
   });
 
   return `https://sandbox.checkout.payulatam.com/ppp-web-gateway-payu/?${params.toString()}`;

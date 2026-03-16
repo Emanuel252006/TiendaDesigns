@@ -20,20 +20,34 @@ import testRoutes from "./router/testRoutes.js";
 
 import { fileURLToPath } from "url";
 import path from "path";
+import fs from "fs";
 
 // 1. Cargamos variables de entorno
 dotenv.config();
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const FRONTEND_DIST_DIR = path.join(__dirname, "../vistas/dist");
+
+const allowedOrigins = new Set([
+  "http://localhost:5173",
+  ...(process.env.FRONTEND_URL || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean),
+]);
 
 // 2. Middlewares
 app.use(
   cors({
-    origin: [
-      'http://localhost:5173',
-      process.env.FRONTEND_URL || 'http://localhost:5173'
-    ],
+    origin: (origin, callback) => {
+      // Allow same-origin and server-side requests with no Origin header.
+      if (!origin || allowedOrigins.has(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`Origen no permitido por CORS: ${origin}`));
+    },
     credentials: true,
   })
 );
@@ -54,6 +68,10 @@ console.log("Static invoices folder:", INVOICES_DIR);
 app.use("/images", express.static(IMAGES_DIR));
 app.use("/invoices", express.static(INVOICES_DIR));
 
+if (fs.existsSync(FRONTEND_DIST_DIR)) {
+  app.use(express.static(FRONTEND_DIST_DIR));
+}
+
 // 4. Rutas de la API
 app.use("/api/tallas", tallasRouter);
 app.use("/api/productTalla", productTallaRoutes);
@@ -68,6 +86,13 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/payu", payuRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/test", testRoutes);
+
+if (fs.existsSync(FRONTEND_DIST_DIR)) {
+  // SPA fallback for client-side routes, excluding backend endpoints.
+  app.get(/^(?!\/api|\/images|\/invoices).*/, (req, res) => {
+    res.sendFile(path.join(FRONTEND_DIST_DIR, "index.html"));
+  });
+}
 
 // 5. Handler genérico de errores
 app.use((err, req, res, next) => {

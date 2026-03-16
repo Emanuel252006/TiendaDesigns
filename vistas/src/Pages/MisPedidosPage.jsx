@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getUserOrders } from '../api/orderApi.js';
 import Navigation from '../components/navegation.jsx';
+import { IMAGES_BASE_URL } from '../config/runtime.js';
 import '../PagesCss/MisPedidosPage.css';
 
 const MisPedidosPage = () => {
@@ -169,7 +170,7 @@ const MisPedidosPage = () => {
                                   <div className="me-3">
                                     {item.Imagen ? (
                                       <img 
-                                        src={`http://localhost:3001/images/${item.Imagen}`}
+                                        src={`${IMAGES_BASE_URL}/${item.Imagen}`}
                                         alt={item.NombreProducto}
                                         className="product-thumb"
                                       />

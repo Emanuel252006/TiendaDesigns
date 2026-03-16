@@ -1,8 +1,8 @@
 import axios from 'axios';
+import { API_PREFIX } from '../config/runtime.js';
 
-// Configuración simplificada para desarrollo local
 const instance = axios.create({
-    baseURL: 'http://localhost:3001/api',
+    baseURL: API_PREFIX,
     withCredentials: true
 })
 
