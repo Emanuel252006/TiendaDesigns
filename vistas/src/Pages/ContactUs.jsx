@@ -1,7 +1,7 @@
 // src/Pages/ContactUs.jsx
 import { useState } from "react";
 import axios from "axios";
-import "../PagesCss/ContactUS.css";
+import "../PagesCss/ContactUs.css";
 import Footer from "../components/Footer.jsx";
 import contactImg from "../images/contactanos.png";
 import React from "react"; // Added missing import for React.useEffect
