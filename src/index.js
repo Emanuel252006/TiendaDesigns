@@ -6,9 +6,10 @@ import './services/emailService.js';
 import './services/pdfService.js';
 
 const PORT = process.env.PORT || 3001;
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
 app.listen(PORT, () => {
-  console.log(`✅ Server corriendo en http://localhost:${PORT}`);
+  console.log(`✅ Server corriendo en http://localhost:${PORT} [${NODE_ENV}]`);
 
   connectBD()
     .then(() => {
