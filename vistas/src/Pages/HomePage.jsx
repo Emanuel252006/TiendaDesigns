@@ -10,8 +10,7 @@ import CarruselModal from "../components/CarruselModal.jsx";
 import DestacadosControls from "../components/DestacadosControls.jsx";
 import DetalleButton from "../components/DetalleButton.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
-
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
+import { API_PREFIX } from "../config/runtime.js";
 
 export default function HomePage() {
   const [banners, setBanners] = useState([]);
@@ -41,7 +40,7 @@ export default function HomePage() {
     
     try {
       // Carga banners
-      const bannersResponse = await fetch(`${API_BASE}/api/carrusel`);
+      const bannersResponse = await fetch(`${API_PREFIX}/carrusel`);
       if (bannersResponse.ok) {
         const bannersData = await bannersResponse.json();
         setBanners(bannersData.sort((a, b) => a.Orden - b.Orden));
@@ -50,7 +49,7 @@ export default function HomePage() {
       }
 
       // Carga productos destacados dinámicos
-      const productosResponse = await fetch(`${API_BASE}/api/products/destacados`);
+      const productosResponse = await fetch(`${API_PREFIX}/products/destacados`);
       if (productosResponse.ok) {
         const productosData = await productosResponse.json();
         console.log('Productos recibidos del backend:', productosData);

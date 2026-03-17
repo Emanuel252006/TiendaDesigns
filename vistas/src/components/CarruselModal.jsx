@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import Swal from 'sweetalert2';
 import CustomImage from './CustomImage.jsx';
-
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
+import { API_PREFIX } from '../config/runtime.js';
 
 const CarruselModal = ({ isOpen, onClose, carruselItems, onUpdate }) => {
   const [loading, setLoading] = useState(false);
@@ -36,7 +35,7 @@ const CarruselModal = ({ isOpen, onClose, carruselItems, onUpdate }) => {
         formData.append('imagen', formValues.imagen);
         formData.append('orden', formValues.orden);
 
-        const response = await fetch(`${API_BASE}/api/carrusel`, {
+        const response = await fetch(`${API_PREFIX}/carrusel`, {
           method: 'POST',
           body: formData
         });
@@ -87,7 +86,7 @@ const CarruselModal = ({ isOpen, onClose, carruselItems, onUpdate }) => {
         }
         formData.append('orden', formValues.orden);
 
-        const response = await fetch(`${API_BASE}/api/carrusel/${item.CarruselID}`, {
+        const response = await fetch(`${API_PREFIX}/carrusel/${item.CarruselID}`, {
           method: 'PUT',
           body: formData
         });
@@ -122,7 +121,7 @@ const CarruselModal = ({ isOpen, onClose, carruselItems, onUpdate }) => {
     if (result.isConfirmed) {
       setLoading(true);
       try {
-        const response = await fetch(`${API_BASE}/api/carrusel/${item.CarruselID}`, {
+        const response = await fetch(`${API_PREFIX}/carrusel/${item.CarruselID}`, {
           method: 'DELETE'
         });
 

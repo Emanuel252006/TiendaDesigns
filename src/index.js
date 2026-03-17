@@ -5,15 +5,17 @@ import { connectBD } from "./db.js";
 import './services/emailService.js';
 import './services/pdfService.js';
 
+const PORT = process.env.PORT || 3001;
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
-// Conecta a la base de datos antes de arrancar el servidor
-connectBD()
-  .then(() => {
-    const PORT = process.env.PORT || 3001;
-    app.listen(PORT, () =>
-      console.log(`✅ Server corriendo en http://localhost:${PORT}`)
-    );
-  })
-  .catch((err) =>
-    console.error("❌ Error al conectar a la base de datos:", err)
-  );
+app.listen(PORT, () => {
+  console.log(`✅ Server corriendo en http://localhost:${PORT} [${NODE_ENV}]`);
+
+  connectBD()
+    .then(() => {
+      console.log('✅ Base de datos inicializada correctamente');
+    })
+    .catch((err) => {
+      console.error('❌ Error al conectar/inicializar la base de datos:', err);
+    });
+});

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import Swal from 'sweetalert2';
-
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
+import { API_PREFIX } from '../config/runtime.js';
 
 const DestacadosControls = ({ onUpdate }) => {
   const [loading, setLoading] = useState(false);
@@ -10,7 +9,7 @@ const DestacadosControls = ({ onUpdate }) => {
   const handleCambiarTipoDestacados = async (tipo) => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/api/products/destacados`, {
+      const response = await fetch(`${API_PREFIX}/products/destacados`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'

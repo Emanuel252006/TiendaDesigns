@@ -1,10 +1,11 @@
 // src/Pages/ContactUs.jsx
 import { useState } from "react";
 import axios from "axios";
-import "../PagesCss/ContactUS.css";
+import "../PagesCss/ContactUs.css";
 import Footer from "../components/Footer.jsx";
 import contactImg from "../images/contactanos.png";
 import React from "react"; // Added missing import for React.useEffect
+import { API_PREFIX } from "../config/runtime.js";
 
 export default function Contactanos() {
   const [firstName, setFirstName] = useState("");
@@ -68,7 +69,7 @@ export default function Contactanos() {
     if (Object.keys(newErrors).length > 0) return;
     setStatus({ loading: true });
     try {
-      await axios.post("http://localhost:3001/api/contact", {
+      await axios.post(`${API_PREFIX}/contact`, {
         nombre: `${firstName} ${lastName}`.trim(),
         email,
         mensaje: message

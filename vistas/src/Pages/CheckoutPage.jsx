@@ -6,6 +6,7 @@ import { useAuthAndCartSync } from '../hooks/useAuthAndCartSync.js';
 import { checkoutApi } from '../api/checkoutApi.js';
 import { getCheckoutDataRequest } from '../api/userApi.js';
 import payuApi from '../api/payuApi.js';
+import { IMAGES_BASE_URL } from '../config/runtime.js';
 import '../PagesCss/CheckoutPage.css';
 import Swal from 'sweetalert2';
 
@@ -556,7 +557,7 @@ const CheckoutPage = () => {
                   <div key={index} className="cart-item-summary">
                     <div className="item-image">
                       <img 
-                        src={`http://localhost:3001/images/${item.Imagen}`} 
+                        src={`${IMAGES_BASE_URL}/${item.Imagen}`} 
                         alt={item.NombreProducto}
                       />
                     </div>
