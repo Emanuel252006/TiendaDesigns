@@ -64,6 +64,17 @@ app.get("/healthz", (req, res) => {
   res.status(200).send("ok");
 });
 
+// Trazas para diagnosticar 502 (Railway proxy vs app)
+app.use((req, res, next) => {
+  logInfo("http_request", {
+    method: req.method,
+    path: req.path,
+    host: req.headers.host,
+    xForwardedFor: req.headers["x-forwarded-for"] ?? null,
+  });
+  next();
+});
+
 // 2. Middlewares
 app.use(
   cors({

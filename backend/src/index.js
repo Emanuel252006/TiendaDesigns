@@ -3,8 +3,8 @@ import { connectBD } from "./db.js";
 import { logInfo, logError } from "./logger.js";
 
 // Inicializar servicios
-import './services/emailService.js';
-import './services/pdfService.js';
+import "./services/emailService.js";
+import "./services/pdfService.js";
 
 const rawPort = process.env.PORT;
 const PORT = rawPort != null && rawPort !== "" ? Number(rawPort) : 3001;
@@ -15,7 +15,7 @@ if (!Number.isFinite(PORT) || PORT <= 0) {
   process.exit(1);
 }
 
-process.on("unhandledRejection", (reason, promise) => {
+process.on("unhandledRejection", (reason) => {
   logError("unhandledRejection", {
     reason: reason instanceof Error ? reason.message : String(reason),
     stack: reason instanceof Error ? reason.stack : undefined,
@@ -35,13 +35,14 @@ logInfo("boot", {
   RAILWAY_ENVIRONMENT: process.env.RAILWAY_ENVIRONMENT ?? null,
 });
 
-const server = app.listen(PORT, "0.0.0.0", () => {
-  logInfo("http_listening", {
-    host: "0.0.0.0",
-    port: PORT,
-    address: server.address(),
-  });
-  console.log(`✅ Server corriendo en 0.0.0.0:${PORT} [${NODE_ENV}]`);
+// Sin segundo argumento: Node elige interfaz (en Linux suele ser :: y acepta IPv4/IPv6 según el sistema).
+// Forzar solo 0.0.0.0 puede dejar fuera el tráfico del proxy de Railway → 502.
+const server = app.listen(PORT, () => {
+  const addr = server.address();
+  logInfo("http_listening", { address: addr });
+  console.log(
+    `✅ HTTP escuchando [${NODE_ENV}] pid=${process.pid} address=${JSON.stringify(addr)}`
+  );
 
   connectBD()
     .then(() => {
@@ -55,4 +56,18 @@ const server = app.listen(PORT, "0.0.0.0", () => {
       });
       console.error("❌ Error al conectar/inicializar la base de datos:", err);
     });
+});
+
+server.on("error", (err) => {
+  logError("listen_fatal", { code: err.code, message: err.message });
+  process.exit(1);
+});
+
+process.once("SIGTERM", () => {
+  logInfo("sigterm", { uptime: process.uptime() });
+  server.close(() => {
+    logInfo("http_closed");
+    process.exit(0);
+  });
+  setTimeout(() => process.exit(1), 25_000).unref();
 });
