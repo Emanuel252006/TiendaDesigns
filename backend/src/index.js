@@ -1,47 +1,58 @@
 import app from "./app.js";
 import { connectBD } from "./db.js";
+import { logInfo, logError } from "./logger.js";
 
 // Inicializar servicios
-import "./services/emailService.js";
-import "./services/pdfService.js";
+import './services/emailService.js';
+import './services/pdfService.js';
 
-function parsePort() {
-  const raw = process.env.PORT;
-  if (raw === undefined || raw === "") {
-    return 3001;
-  }
-  const n = Number(raw);
-  if (!Number.isFinite(n) || n < 1 || n > 65535) {
-    console.error("❌ PORT inválido:", raw);
-    process.exit(1);
-  }
-  return n;
-}
-
-const PORT = parsePort();
+const rawPort = process.env.PORT;
+const PORT = rawPort != null && rawPort !== "" ? Number(rawPort) : 3001;
 const NODE_ENV = process.env.NODE_ENV || "development";
 
+if (!Number.isFinite(PORT) || PORT <= 0) {
+  logError("PORT invalido", { rawPort, parsed: PORT });
+  process.exit(1);
+}
+
 process.on("unhandledRejection", (reason, promise) => {
-  console.error("❌ unhandledRejection:", reason, promise);
+  logError("unhandledRejection", {
+    reason: reason instanceof Error ? reason.message : String(reason),
+    stack: reason instanceof Error ? reason.stack : undefined,
+  });
 });
+
 process.on("uncaughtException", (err) => {
-  console.error("❌ uncaughtException:", err);
+  logError("uncaughtException", { message: err.message, stack: err.stack });
   process.exit(1);
 });
 
-console.log("[boot] NODE_ENV=", NODE_ENV, "PORT=", PORT, "RAILWAY_ENVIRONMENT=", process.env.RAILWAY_ENVIRONMENT ?? "(n/a)");
+logInfo("boot", {
+  NODE_ENV,
+  PORT,
+  rawPort: rawPort ?? null,
+  RAILWAY_PUBLIC_DOMAIN: process.env.RAILWAY_PUBLIC_DOMAIN ?? null,
+  RAILWAY_ENVIRONMENT: process.env.RAILWAY_ENVIRONMENT ?? null,
+});
 
 const server = app.listen(PORT, "0.0.0.0", () => {
-  console.log(`✅ HTTP escuchando en 0.0.0.0:${PORT} [${NODE_ENV}] pid=${process.pid}`);
-  // Evita 502 por cierre prematuro de conexiones detrás del proxy de Railway
-  server.keepAliveTimeout = 65000;
-  server.headersTimeout = 66000;
+  logInfo("http_listening", {
+    host: "0.0.0.0",
+    port: PORT,
+    address: server.address(),
+  });
+  console.log(`✅ Server corriendo en 0.0.0.0:${PORT} [${NODE_ENV}]`);
 
   connectBD()
     .then(() => {
+      logInfo("db_ready");
       console.log("✅ Base de datos inicializada correctamente");
     })
     .catch((err) => {
+      logError("db_init_failed", {
+        message: err?.message,
+        stack: err?.stack,
+      });
       console.error("❌ Error al conectar/inicializar la base de datos:", err);
     });
 });

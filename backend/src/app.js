@@ -21,6 +21,7 @@ import testRoutes from "./router/testRoutes.js";
 import { fileURLToPath } from "url";
 import path from "path";
 import fs from "fs";
+import { logInfo, logWarn } from "./logger.js";
 
 // 1. Cargamos variables de entorno
 dotenv.config();
@@ -31,15 +32,10 @@ app.set("trust proxy", 1);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FRONTEND_DIST_DIR = path.join(__dirname, "../../frontend/dist");
 
-// Railway / balanceadores: respuesta rápida sin depender de la BD
-app.get(["/health", "/healthz"], (req, res) => {
-  res.status(200).json({
-    ok: true,
-    uptime: process.uptime(),
-    pid: process.pid,
-    port: process.env.PORT ?? null,
-  });
-});
+const railwayPublicOrigin = process.env.RAILWAY_PUBLIC_DOMAIN
+  ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`
+  : null;
+const railwayStaticOrigin = process.env.RAILWAY_STATIC_URL || null;
 
 const allowedOrigins = new Set([
   "http://localhost:5173",
@@ -51,7 +47,22 @@ const allowedOrigins = new Set([
     .split(",")
     .map((origin) => origin.trim())
     .filter(Boolean),
+  ...(railwayPublicOrigin ? [railwayPublicOrigin] : []),
+  ...(railwayStaticOrigin ? [railwayStaticOrigin] : []),
 ]);
+
+// Health sin middleware pesado (Railway healthcheck / 502)
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    ok: true,
+    uptime: process.uptime(),
+    ts: Date.now(),
+  });
+});
+
+app.get("/healthz", (req, res) => {
+  res.status(200).send("ok");
+});
 
 // 2. Middlewares
 app.use(
@@ -62,13 +73,14 @@ app.use(
         return callback(null, true);
       }
 
-      return callback(new Error(`Origen no permitido por CORS: ${origin}`));
+      logWarn("cors_rejected", { origin });
+      return callback(null, false);
     },
     credentials: true,
   })
 );
 app.use(express.json());
-app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
+app.use(morgan("dev"));
 app.use(cookieParser());
 app.use(fileUpload({
   useTempFiles: true,
@@ -108,7 +120,7 @@ app.use("/api/test", testRoutes);
 
 if (fs.existsSync(FRONTEND_DIST_DIR)) {
   // SPA fallback for client-side routes, excluding backend endpoints.
-  app.get(/^(?!\/api|\/images|\/invoices).*/, (req, res) => {
+  app.get(/^(?!\/api|\/images|\/invoices|\/health|\/healthz).*/, (req, res) => {
     res.sendFile(path.join(FRONTEND_DIST_DIR, "index.html"));
   });
 }

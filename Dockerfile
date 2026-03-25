@@ -25,6 +25,7 @@ COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
 ENV NODE_ENV=production
 
-EXPOSE 8080
+# Railway inyecta PORT en runtime; no fijar aqui para evitar desajustes con el proxy.
+EXPOSE 3000
 
 CMD ["node", "backend/src/index.js"]
