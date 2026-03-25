@@ -26,8 +26,20 @@ import fs from "fs";
 dotenv.config();
 
 const app = express();
+app.set("trust proxy", 1);
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FRONTEND_DIST_DIR = path.join(__dirname, "../../frontend/dist");
+
+// Railway / balanceadores: respuesta rápida sin depender de la BD
+app.get(["/health", "/healthz"], (req, res) => {
+  res.status(200).json({
+    ok: true,
+    uptime: process.uptime(),
+    pid: process.pid,
+    port: process.env.PORT ?? null,
+  });
+});
 
 const allowedOrigins = new Set([
   "http://localhost:5173",
@@ -56,7 +68,7 @@ app.use(
   })
 );
 app.use(express.json());
-app.use(morgan("dev"));
+app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 app.use(cookieParser());
 app.use(fileUpload({
   useTempFiles: true,
