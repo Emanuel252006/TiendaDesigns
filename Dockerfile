@@ -13,6 +13,10 @@ WORKDIR /app
 # nginx + envsubst para usar el puerto dinamico de Railway
 RUN apt-get update && apt-get install -y --no-install-recommends nginx gettext-base && rm -rf /var/lib/apt/lists/*
 
+# Shim para Railway si el Start Command sigue siendo `node src/index.js`
+COPY package.json ./
+COPY src ./src
+
 # Backend dependencies + source
 COPY backend/package*.json ./backend/
 RUN npm ci --omit=dev --prefix ./backend

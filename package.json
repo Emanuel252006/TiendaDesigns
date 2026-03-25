@@ -2,6 +2,7 @@
   "name": "tiendadesigns-monorepo",
   "private": true,
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "dev:backend": "npm run dev --prefix backend",
     "dev:frontend": "npm run dev --prefix frontend",
