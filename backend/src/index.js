@@ -63,11 +63,11 @@ server.on("error", (err) => {
   process.exit(1);
 });
 
+// Railway envia SIGTERM al sustituir una version (contenedor viejo): es normal ver "Stopping Container" en los logs del deploy.
 process.once("SIGTERM", () => {
-  logInfo("sigterm", { uptime: process.uptime() });
+  logInfo("sigterm_graceful_shutdown", { uptime: process.uptime() });
   server.close(() => {
     logInfo("http_closed");
     process.exit(0);
   });
-  setTimeout(() => process.exit(1), 25_000).unref();
 });
