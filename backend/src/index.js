@@ -35,10 +35,19 @@ logInfo("boot", {
   RAILWAY_ENVIRONMENT: process.env.RAILWAY_ENVIRONMENT ?? null,
 });
 
+// #region agent log
+fetch('http://127.0.0.1:7244/ingest/de36ff69-006a-43b4-9c6a-abb74e0d808a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.js:40',message:'About to start server binding',data:{PORT,NODE_ENV},timestamp:Date.now(),runId:'debug',hypothesisId:'B'})}).catch(()=>{});
+// #endregion
+
 // Sin segundo argumento: Node elige interfaz (en Linux suele ser :: y acepta IPv4/IPv6 según el sistema).
 // Forzar solo 0.0.0.0 puede dejar fuera el tráfico del proxy de Railway → 502.
 const server = app.listen(PORT, () => {
   const addr = server.address();
+  
+  // #region agent log
+  fetch('http://127.0.0.1:7244/ingest/de36ff69-006a-43b4-9c6a-abb74e0d808a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'index.js:45',message:'Server successfully bound to address',data:{address:addr,PORT,family:addr?.family},timestamp:Date.now(),runId:'debug',hypothesisId:'B'})}).catch(()=>{});
+  // #endregion
+  
   logInfo("http_listening", { address: addr });
   console.log(
     `✅ HTTP escuchando [${NODE_ENV}] pid=${process.pid} address=${JSON.stringify(addr)}`

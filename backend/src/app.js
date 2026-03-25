@@ -51,6 +51,10 @@ const allowedOrigins = new Set([
   ...(railwayStaticOrigin ? [railwayStaticOrigin] : []),
 ]);
 
+// #region agent log
+fetch('http://127.0.0.1:7244/ingest/de36ff69-006a-43b4-9c6a-abb74e0d808a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:52',message:'CORS allowed origins configuration',data:{allowedOrigins:Array.from(allowedOrigins),railwayPublicOrigin,railwayStaticOrigin,frontendUrl:process.env.FRONTEND_URL,backendUrl:process.env.BACKEND_URL},timestamp:Date.now(),runId:'debug',hypothesisId:'D'})}).catch(()=>{});
+// #endregion
+
 // Health sin middleware pesado (Railway healthcheck / 502)
 app.get("/health", (req, res) => {
   res.status(200).json({
@@ -66,6 +70,10 @@ app.get("/healthz", (req, res) => {
 
 // Trazas para diagnosticar 502 (Railway proxy vs app)
 app.use((req, res, next) => {
+  // #region agent log
+  fetch('http://127.0.0.1:7244/ingest/de36ff69-006a-43b4-9c6a-abb74e0d808a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:75',message:'Request received by Express app',data:{method:req.method,path:req.path,url:req.url,host:req.headers.host,origin:req.headers.origin,userAgent:req.headers['user-agent']?.substring(0,100)},timestamp:Date.now(),runId:'debug',hypothesisId:'E'})}).catch(()=>{});
+  // #endregion
+  
   logInfo("http_request", {
     method: req.method,
     path: req.path,
@@ -79,12 +87,21 @@ app.use((req, res, next) => {
 app.use(
   cors({
     origin: (origin, callback) => {
+      // #region agent log
+      fetch('http://127.0.0.1:7244/ingest/de36ff69-006a-43b4-9c6a-abb74e0d808a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:85',message:'CORS origin check',data:{origin,hasOrigin:!!origin,isAllowed:!origin || allowedOrigins.has(origin)},timestamp:Date.now(),runId:'debug',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
+      
       // Allow same-origin and server-side requests with no Origin header.
       if (!origin || allowedOrigins.has(origin)) {
         return callback(null, true);
       }
 
       logWarn("cors_rejected", { origin });
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7244/ingest/de36ff69-006a-43b4-9c6a-abb74e0d808a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:95',message:'CORS rejected origin',data:{origin,allowedOrigins:Array.from(allowedOrigins)},timestamp:Date.now(),runId:'debug',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
+      
       return callback(null, false);
     },
     credentials: true,
@@ -109,9 +126,25 @@ app.use("/invoices", express.static(INVOICES_DIR));
 
 if (fs.existsSync(FRONTEND_DIST_DIR)) {
   console.log("📁 Sirviendo frontend desde:", FRONTEND_DIST_DIR);
+  
+  // #region agent log
+  try {
+    const files = fs.readdirSync(FRONTEND_DIST_DIR);
+    const indexExists = fs.existsSync(path.join(FRONTEND_DIST_DIR, 'index.html'));
+    const indexSize = indexExists ? fs.statSync(path.join(FRONTEND_DIST_DIR, 'index.html')).size : 0;
+    fetch('http://127.0.0.1:7244/ingest/de36ff69-006a-43b4-9c6a-abb74e0d808a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:112',message:'Frontend dist directory contents',data:{files,indexExists,indexSize,distPath:FRONTEND_DIST_DIR},timestamp:Date.now(),runId:'debug',hypothesisId:'A'})}).catch(()=>{});
+  } catch (err) {
+    fetch('http://127.0.0.1:7244/ingest/de36ff69-006a-43b4-9c6a-abb74e0d808a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:112',message:'Error reading frontend dist',data:{error:err.message,distPath:FRONTEND_DIST_DIR},timestamp:Date.now(),runId:'debug',hypothesisId:'A'})}).catch(()=>{});
+  }
+  // #endregion
+  
   app.use(express.static(FRONTEND_DIST_DIR));
 } else {
   console.warn("⚠️ No existe frontend/dist; solo API (revisa el build en Docker).");
+  
+  // #region agent log
+  fetch('http://127.0.0.1:7244/ingest/de36ff69-006a-43b4-9c6a-abb74e0d808a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:116',message:'Frontend dist directory does not exist',data:{distPath:FRONTEND_DIST_DIR},timestamp:Date.now(),runId:'debug',hypothesisId:'A'})}).catch(()=>{});
+  // #endregion
 }
 
 // 4. Rutas de la API
@@ -132,7 +165,21 @@ app.use("/api/test", testRoutes);
 if (fs.existsSync(FRONTEND_DIST_DIR)) {
   // SPA fallback for client-side routes, excluding backend endpoints.
   app.get(/^(?!\/api|\/images|\/invoices|\/health|\/healthz).*/, (req, res) => {
-    res.sendFile(path.join(FRONTEND_DIST_DIR, "index.html"));
+    const indexPath = path.join(FRONTEND_DIST_DIR, "index.html");
+    
+    // #region agent log
+    fetch('http://127.0.0.1:7244/ingest/de36ff69-006a-43b4-9c6a-abb74e0d808a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:150',message:'SPA fallback route hit',data:{path:req.path,url:req.url,indexPath,indexExists:fs.existsSync(indexPath)},timestamp:Date.now(),runId:'debug',hypothesisId:'C'})}).catch(()=>{});
+    // #endregion
+    
+    res.sendFile(indexPath, (err) => {
+      if (err) {
+        // #region agent log
+        fetch('http://127.0.0.1:7244/ingest/de36ff69-006a-43b4-9c6a-abb74e0d808a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app.js:155',message:'Error serving index.html',data:{error:err.message,indexPath},timestamp:Date.now(),runId:'debug',hypothesisId:'C'})}).catch(()=>{});
+        // #endregion
+        
+        res.status(500).json({error: 'Could not serve index.html'});
+      }
+    });
   });
 }
 
