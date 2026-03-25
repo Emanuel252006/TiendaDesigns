@@ -35,6 +35,10 @@ const allowedOrigins = new Set([
     .split(",")
     .map((origin) => origin.trim())
     .filter(Boolean),
+  ...(process.env.BACKEND_URL || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean),
 ]);
 
 // 2. Middlewares
@@ -69,7 +73,10 @@ app.use("/images", express.static(IMAGES_DIR));
 app.use("/invoices", express.static(INVOICES_DIR));
 
 if (fs.existsSync(FRONTEND_DIST_DIR)) {
+  console.log("📁 Sirviendo frontend desde:", FRONTEND_DIST_DIR);
   app.use(express.static(FRONTEND_DIST_DIR));
+} else {
+  console.warn("⚠️ No existe frontend/dist; solo API (revisa el build en Docker).");
 }
 
 // 4. Rutas de la API

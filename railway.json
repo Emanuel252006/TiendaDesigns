@@ -5,6 +5,6 @@
     "dockerfilePath": "Dockerfile"
   },
   "deploy": {
-    "startCommand": "/start.sh"
+    "startCommand": "node backend/src/index.js"
   }
 }
