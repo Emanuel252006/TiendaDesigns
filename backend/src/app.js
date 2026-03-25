@@ -27,7 +27,7 @@ dotenv.config();
 
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const FRONTEND_DIST_DIR = path.join(__dirname, "../vistas/dist");
+const FRONTEND_DIST_DIR = path.join(__dirname, "../../frontend/dist");
 
 const allowedOrigins = new Set([
   "http://localhost:5173",

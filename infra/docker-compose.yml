@@ -6,26 +6,26 @@ version: '3.8'
 services:
   backend:
     build:
-      context: .
-      dockerfile: Dockerfile.backend
+      context: ../backend
+      dockerfile: Dockerfile
     container_name: tienda-backend
     restart: always
     environment:
       - NODE_ENV=production
     ports:
-      - "3000:3000"
+      - "3001:3001"
     working_dir: /app
     volumes:
-      - ./src:/app/src
-      - ./images:/app/images
-      - ./invoices:/app/invoices
+      - ../backend/src:/app/src
+      - ../backend/images:/app/images
+      - ../backend/invoices:/app/invoices
     depends_on:
       - frontend
 
   frontend:
     build:
-      context: ./vistas
-      dockerfile: Dockerfile.frontend
+      context: ../frontend
+      dockerfile: Dockerfile
     container_name: tienda-frontend
     restart: always
     environment:
